@@ -1,0 +1,17 @@
+.user-select-none {
+  user-select: none;
+}
+
+.press-start-2p-font {
+  font-family: 'Press Start 2P', cursive;
+}
+
+.ipril-text-color {
+  color: #81D4FA;
+}
+
+.font-size {
+  &-14 {
+    font-size: 14px !important;
+  }
+}
