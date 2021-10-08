@@ -1,151 +1,175 @@
 <template>
   <v-container>
     <v-row class="text-center">
-      <v-col cols="12">
-        <v-img
-          :src="require('../assets/logo.svg')"
-          class="my-3"
-          contain
-          height="200"
-        />
-      </v-col>
-
-      <v-col class="mb-4">
-        <h1 class="text-h3 font-weight-bold mb-3">
-          Welcome to Vuetify
-        </h1>
-
-        <p class="subheading font-weight-regular">
-          For help and collaboration with other Vuetify developers,
-          <br>please join our online
-          <a
-            href="https://community.vuetifyjs.com"
-            target="_blank"
-          >Discord Community</a>
-        </p>
-      </v-col>
-
       <v-col
-        class="mb-5"
-        cols="12"
+        v-for="(data_sample) in data_sampling"
+        :key="data_sample.id"
       >
-        <h2 class="text-h5 font-weight-bold mb-3">
-          What's next?
-        </h2>
-
-        <v-row justify="center">
-          <a
-            v-for="(next, i) in whatsNext"
-            :key="i"
-            :href="next.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ next.text }}
-          </a>
-        </v-row>
-      </v-col>
-
-      <v-col
-        class="mb-5"
-        cols="12"
-      >
-        <h2 class="text-h5 font-weight-bold mb-3">
-          Important Links
-        </h2>
-
-        <v-row justify="center">
-          <a
-            v-for="(link, i) in importantLinks"
-            :key="i"
-            :href="link.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ link.text }}
-          </a>
-        </v-row>
-      </v-col>
-
-      <v-col
-        class="mb-5"
-        cols="12"
-      >
-        <h2 class="text-h5 font-weight-bold mb-3">
-          Ecosystem
-        </h2>
-
-        <v-row justify="center">
-          <a
-            v-for="(eco, i) in ecosystem"
-            :key="i"
-            :href="eco.href"
-            class="subheading mx-3"
-            target="_blank"
-          >
-            {{ eco.text }}
-          </a>
-        </v-row>
+        <v-card
+          class="mx-auto"
+          max-width="344"
+        >
+          <v-card-text>
+            <div>{{ data_sample.name }}</div>
+            <p>adjective</p>
+            <v-card-text v-if="data_sample.settings.reveal">
+              <v-data-table
+                :headers="data_sample.data.headers"
+                :items="data_sample.data.items"
+                :items-per-page="5"
+                class="elevation-1"
+              />
+            </v-card-text>
+            <v-card-text v-else>
+              <v-sheet color="rgba(0, 0, 0, .12)">
+                <v-sparkline
+                  :value="data_sample.settings.value"
+                  color="rgba(255, 255, 255, .7)"
+                  height="100"
+                  padding="24"
+                  stroke-linecap="round"
+                  smooth
+                >
+                  <template v-slot:label="item">
+                    ${{ item.value }}
+                  </template>
+                </v-sparkline>
+              </v-sheet>
+            </v-card-text>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn
+              text
+              color="teal accent-4"
+              @click="changeView(data_sample)"
+            >
+              табличный вид
+            </v-btn>
+          </v-card-actions>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
+
+  /**
+   * Classes
+   */
+  import DataSample from 'Classes/DataSample';
+
   export default {
     name: 'HelloWorld',
-
     data: () => ({
-      ecosystem: [
-        {
-          text: 'vuetify-loader',
-          href: 'https://github.com/vuetifyjs/vuetify-loader',
-        },
-        {
-          text: 'github',
-          href: 'https://github.com/vuetifyjs/vuetify',
-        },
-        {
-          text: 'awesome-vuetify',
-          href: 'https://github.com/vuetifyjs/awesome-vuetify',
-        },
-      ],
-      importantLinks: [
-        {
-          text: 'Documentation',
-          href: 'https://vuetifyjs.com',
-        },
-        {
-          text: 'Chat',
-          href: 'https://community.vuetifyjs.com',
-        },
-        {
-          text: 'Made with Vuetify',
-          href: 'https://madewithvuejs.com/vuetify',
-        },
-        {
-          text: 'Twitter',
-          href: 'https://twitter.com/vuetifyjs',
-        },
-        {
-          text: 'Articles',
-          href: 'https://medium.com/vuetify',
-        },
-      ],
-      whatsNext: [
-        {
-          text: 'Explore components',
-          href: 'https://vuetifyjs.com/components/api-explorer',
-        },
-        {
-          text: 'Select a layout',
-          href: 'https://vuetifyjs.com/getting-started/pre-made-layouts',
-        },
-        {
-          text: 'Frequently Asked Questions',
-          href: 'https://vuetifyjs.com/getting-started/frequently-asked-questions',
-        },
-      ],
+      data_sampling: [],
     }),
+    computed: {
+
+      DEFAULT_DATA_OBJECT() {
+        return {
+          headers: [
+            { text: 'Специальность', value: 'name' },
+            { text: 'Зарплата', value: 'salary' },
+          ],
+          items: [
+            {
+              name: 'Программист',
+              salary: 200000,
+            },
+            {
+              name: 'Менеджер',
+              salary: 30000,
+            },
+            {
+              name: 'Сис.админ',
+              salary: 15000,
+            },
+          ],
+        };
+      },
+    },
+    mounted() {
+      this.data_sampling.push(new DataSample({
+        id: 1,
+        name: 'Заработные платы Московская область',
+        settings: {
+          value: [
+            423,
+            446,
+            675,
+            510,
+            590,
+            610,
+            760,
+          ],
+        },
+        data: this.DEFAULT_DATA_OBJECT,
+      }));
+
+      this.data_sampling.push(new DataSample({
+        id: 2,
+        name: 'Заработные платы Пензенская область',
+        settings: {
+          value: [
+            423,
+            446,
+            675,
+            510,
+            590,
+            610,
+            760,
+          ],
+          reveal: false,
+        },
+        data: this.DEFAULT_DATA_OBJECT,
+      }));
+
+      this.onDataLoaded();
+    },
+    methods: {
+
+      /**
+       * Вызывается в момент срабатывания события сокета, пришли данные на запрос
+       *
+       * @return {undefined}
+       */
+      onDataLoaded() {
+        this.data_sampling.push(new DataSample({
+          id: 3,
+          name: 'Заработные платы Астраханская область',
+          settings: {
+            value: [
+              423,
+              446,
+              675,
+              510,
+              590,
+              610,
+              760,
+            ],
+            reveal: false,
+          },
+          data: this.DEFAULT_DATA_OBJECT,
+        }));
+      },
+
+      changeView(data_sample) {
+        this.$nextTick(() => {
+          // this.$set;
+          data_sample.settings.reveal = !data_sample.settings.reveal;
+        });
+      },
+
+    },
   };
 </script>
+
+<style>
+  .v-card--reveal {
+    bottom: 0;
+    opacity: 1 !important;
+    position: absolute;
+    width: 100%;
+  }
+</style>
