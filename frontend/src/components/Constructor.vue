@@ -235,6 +235,7 @@
           <v-col cols="3">
             <v-text-field
               v-model="item.name"
+              clearable
               hide-details
             />
           </v-col>
@@ -244,6 +245,7 @@
           <v-col cols="3">
             <v-text-field
               v-model="item.formula"
+              clearable
               hide-details
               @dragenter.prevent
               @dragover.prevent
