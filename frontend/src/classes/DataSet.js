@@ -13,6 +13,7 @@ class DataSet {
 
     this.id = id;
     this.name = args_object.name ?? '';
+    this.title = args_object.title ?? '';
     this.schema = args_object.schema ?? {};
     this.settings = args_object.settings ?? {};
   }
@@ -32,6 +33,7 @@ class DataSet {
     return new DataSet({
       id: data.datahub.hash,
       name: data.name,
+      title: data.title,
       schema: schema,
     });
   }

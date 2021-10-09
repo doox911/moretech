@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row>
-      <v-col>
+      <v-col cols="2">
         <v-autocomplete
           v-model="selected_default_datasets"
           :items="default_datasets"
