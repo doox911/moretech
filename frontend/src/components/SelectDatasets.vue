@@ -1,7 +1,11 @@
 <template>
   <v-container>
-    <v-row>
-      <v-col cols="2">
+    <v-row justify="space-between">
+      <v-col
+        cols="12"
+        md="8"
+        sm="12"
+      >
         <v-autocomplete
           v-model="selected_data_sources"
           :items="data_sources"
@@ -15,7 +19,10 @@
           label="Выбор датасетов"
         />
       </v-col>
-      <v-col cols="1">
+      <v-col
+        cols="3"
+        sm="1"
+      >
         <v-btn
           color="success"
           fab
@@ -31,7 +38,10 @@
           </v-icon>
         </v-btn>
       </v-col>
-      <v-col cols="1">
+      <v-col
+        cols="3"
+        sm="1"
+      >
         <v-btn
           color="success"
           fab

@@ -1,3 +1,9 @@
+$vtb_color: #46abf8;
+
+html {
+  overflow: auto;
+}
+
 .user-select-none {
   user-select: none;
 }
@@ -14,4 +20,26 @@
   &-14 {
     font-size: 14px !important;
   }
+}
+
+.border-radius {
+  border: 1px solid $vtb_color;
+  border-radius: 15px;
+}
+
+.vtb-color {
+  color: $vtb_color;
+
+  &-border {
+    border-color: $vtb_color;
+  }
+
+  &-background {
+    background-color: $vtb_color;
+  }
+}
+
+.divider {
+  border-top: 1px solid $vtb_color;
+  margin: 10px 0;
 }
