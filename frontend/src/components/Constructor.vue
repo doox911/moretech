@@ -1,28 +1,34 @@
 <template>
   <v-container fluid>
-    <v-row
-      v-for="(dataset, index) in datasets"
-      :key="index"
-    >
-      <v-col cols="3">
+    <v-row>
+      <v-col cols="auto">
+        <h1>Выберите датасеты</h1>
+      </v-col>
+      <v-col>
+        <select-datasets
+          @openDatasets="openDatasets"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col
+        v-for="(dataset, index) in datasets"
+        :key="index"
+        cols="3"
+      >
         <v-card>
           <v-card-title> {{ dataset.name }}</v-card-title>
           <v-card-text>
-            <div
-              v-for="(schema, schema_index) in dataset.schemas"
-              :key="schema_index"
+            <v-chip
+              v-for="(field, field_index) in dataset.schema.fields"
+              :key="field_index"
+              class="ma-1"
+              :draggable="true"
+              @dragstart="onDragStart(field, field_index)"
+              @dragend="onDragEnd()"
             >
-              <v-chip
-                v-for="(field, field_index) in schema.fields"
-                :key="field_index"
-                class="ma-1"
-                :draggable="true"
-                @dragstart="onDragStart(field, field_index)"
-                @dragend="onDragEnd()"
-              >
-                {{ field.name }}({{ field.type }})
-              </v-chip>
-            </div>
+              {{ field.name }}({{ field.type }})
+            </v-chip>
           </v-card-text>
         </v-card>
       </v-col>
@@ -158,8 +164,14 @@
    * Classes
    */
 
+  import SelectDatasets from './SelectDatasets';
+
   export default {
     name: 'Constructor',
+
+    components: {
+      SelectDatasets,
+    },
 
     data: () => ({
       datasets: [],
@@ -180,23 +192,29 @@
     computed: {},
 
     async mounted() {
-      const path = 'https://datahub.io/core/population/datapackage.json';
-
-      const response = await fetch(path);
-
-      const data = await response.json();
-
-      const schemas = data.resources.map(r => r.schema).filter(e => !!e);
-
-      this.datasets.push({
-        name: data.name,
-        schemas,
-      });
-
-      console.log(this.datasets);
+      // const path = 'https://datahub.io/core/population/datapackage.json';
+      //
+      // const response = await fetch(path);
+      //
+      // const data = await response.json();
+      //
+      // const schemas = data.resources.map(r => r.schema).filter(e => !!e);
+      //
+      // this.datasets.push({
+      //   name: data.name,
+      //   schemas,
+      // });
+      //
+      // console.log(this.datasets);
     },
 
     methods: {
+      openDatasets(datasets) {
+        this.datasets = datasets;
+
+        console.log(datasets);
+      },
+
       addCondition() {
         this.operations_to_fields.push({
           field: null,
