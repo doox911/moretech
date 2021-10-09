@@ -209,8 +209,8 @@ class MetaDataController {
   }
 
   /**
-   * @param \App\Http\Requests\DataSetQueryRequest $request
-   * @return \Illuminate\Http\JsonResponse
+   * @param DataSetQueryRequest $request
+   * @return JsonResponse
    */
   public function runQuery(DataSetQueryRequest $request): JsonResponse {
     $data = $request->validated();
