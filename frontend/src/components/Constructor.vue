@@ -384,6 +384,7 @@
     </v-row>
 
     <v-row
+      v-if="to_selected_fields.length"
       align="center"
       justify="center"
     >
