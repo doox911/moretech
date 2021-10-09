@@ -53,6 +53,7 @@
 
       loading: false,
       loading_toast: null,
+      toasts: [],
     }),
     computed: {
 
@@ -80,7 +81,7 @@
       openDataset() {
         this.$emit('openDatasets', this.selected_default_datasets.map(ds => ds.getCopy()));
 
-        datasets.map(dataset => {
+        this.selected_default_datasets.map(dataset => {
           const toast = this.$toast.open({
             message: 'Датасет ' + dataset.name + ' готов к использованию',
             type: 'success',

@@ -7,9 +7,9 @@ import vuetify from './plugins/vuetify';
 import VueToast from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 
-Vue.use(VueToast);
-
 import './assets/index.scss';
+
+Vue.use(VueToast);
 
 Vue.config.productionTip = false;
 
