@@ -19,7 +19,7 @@
         md="4"
       >
         <v-card>
-          <v-card-title class="mb-3 blue lighten-1 white--text">
+          <v-card-title class="mb-3 vtb-color white--text">
             {{ dataset.name }}
           </v-card-title>
           <v-card-text>
@@ -27,9 +27,9 @@
               v-for="(field, field_index) in dataset.schema.fields"
               :key="field_index"
               class="ma-1"
-              color="blue lighten-1"
+              color="vtb-color"
               outlined
-              text-color="blue lighten-1"
+              text-color="vtb-color"
               :draggable="true"
               @dragstart="onDragStart(field, field_index, dataset)"
               @dragend="onDragEnd()"
@@ -56,16 +56,20 @@
             v-for="(field, index) in to_selected_fields"
             :key="index"
             class="ma-2"
-            color="blue lighten-1"
+            color="vtb-color"
             outlined
-            text-color="blue lighten-1"
+            text-color="vtb-color"
             @dblclick="removeFieldFromSelect(index)"
           >
             {{ field.name }}
           </v-chip>
         </template>
         <template v-else>
-          <v-row justify="center">
+          <v-row
+            align="center"
+            class="fill-height"
+            justify="center"
+          >
             <v-col
               class="text-center"
               cols="auto"
@@ -92,16 +96,20 @@
             v-for="(field, index) in to_sort_fields"
             :key="index"
             class="ma-2"
-            color="blue lighten-1"
+            color="vtb-color"
             outlined
-            text-color="blue lighten-1"
+            text-color="vtb-color"
             @dblclick="removeFieldFromSort(index)"
           >
             {{ field.name }}
           </v-chip>
         </template>
         <template v-else>
-          <v-row justify="center">
+          <v-row
+            align="center"
+            class="fill-height"
+            justify="center"
+          >
             <v-col
               class="text-center"
               cols="auto"
@@ -134,9 +142,9 @@
               <template v-if="item.field">
                 <v-chip
                   class="ma-2"
-                  color="blue lighten-1"
+                  color="vtb-color"
                   outlined
-                  text-color="blue lighten-1"
+                  text-color="vtb-color"
                 >
                   {{ item.field.name }}
                 </v-chip>
@@ -173,7 +181,7 @@
         <v-row>
           <v-col>
             <v-btn
-              color="blue lighten-1"
+              color="vtb-color"
               text
               rounded
               @click="addCondition"
@@ -182,6 +190,21 @@
             </v-btn>
           </v-col>
         </v-row>
+      </v-col>
+    </v-row>
+    <v-row
+      align="center"
+      justify="center"
+    >
+      <v-col cols="auto">
+        <v-btn
+          color="vtb-color"
+          text
+          rounded
+          @click="createTask"
+        >
+          Сформировать задание
+        </v-btn>
       </v-col>
     </v-row>
   </v-container>
@@ -295,6 +318,10 @@
       removeFieldFromSort(index) {
         this.to_sort_fields.splice(index, 1);
       },
+
+      createTask() {
+
+      },
     },
   };
 </script>
@@ -303,11 +330,11 @@
 
   .fields-container {
     min-height: 3.2em;
-    border: 2px dashed #42A5F5;
+    border: 2px dashed #46abf8;
   }
 
   .border-vtb-blue {
-    border: 2px solid #42A5F5 !important;
+    border: 2px solid #46abf8 !important;
   }
 
   .width-select {
