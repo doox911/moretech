@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DataSourceRequest;
 use App\Services\MetaDataService;
 use App\Classes\DataSetsGetter;
 use App\Classes\MetaDataGetter;
@@ -11,8 +12,26 @@ use App\Models\DataSource;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\JsonResponse;
+use Throwable;
 
 class MetaDataController {
+
+  /**
+   *
+   * @param DataSourceRequest $request
+   * @return JsonResponse
+   * @throws Throwable
+   */
+  public function storeDataSource(DataSourceRequest $request): JsonResponse {
+    $data = $request->validated();
+
+    return response()->json([
+      'messages' => ['Источник датасета успешно сохранён'],
+      'content' => [
+        'new_data_source' => DataSource::create($data),
+      ]
+    ]);
+  }
 
   /**
    *
