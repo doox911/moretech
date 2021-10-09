@@ -18,7 +18,7 @@
         sm="6"
         md="4"
       >
-        <v-card>
+        <v-card height="100%">
           <v-card-title class="mb-3 vtb-color white--text">
             {{ dataset.name }}
           </v-card-title>
@@ -95,10 +95,12 @@
         </v-card>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row justify="space-around">
       <!-- Selected -->
       <v-col
-        class="ma-2 pa-3 rounded-lg fields-container"
+        class="pa-3 rounded-lg fields-container"
+        md="3"
+        sm="12"
         draggable="false"
         @dragenter.prevent
         @dragover.prevent
@@ -138,7 +140,9 @@
 
       <!-- Sort -->
       <v-col
-        class="ma-2 pa-3 rounded-lg fields-container"
+        class="pa-3 rounded-lg fields-container"
+        md="3"
+        sm="12"
         draggable="false"
         @dragenter.prevent
         @dragover.prevent
@@ -177,71 +181,106 @@
       </v-col>
 
       <!-- Where -->
-      <v-col>
-        <v-row
+      <v-col
+        md="5"
+        sm="12"
+      >
+        <template
           v-for="(item, index) in operations_to_fields"
+        >
+
+        <v-row
           :key="index"
           align="center"
         >
+
           <v-col
-            cols="12"
-            class="ma-2 pa-3 rounded-lg fields-container"
-          >
-            <div
-              @dragenter.prevent
-              @dragover.prevent
-              @dragleave.prevent
-              @drop.prevent="onDropOperationField(index)"
-            >
-              <template v-if="item.field">
-                <v-chip
-                  class="ma-2"
-                  color="vtb-color"
-                  outlined
-                  text-color="vtb-color"
-                >
-                  {{ item.field.name }}
-                </v-chip>
-              </template>
-              <template v-else>
-                <v-row justify="center">
-                  <v-col cols="auto">
-                    <span class="user-select-none grey--text text--lighten-1 text-h4">
-                      Поле
-                    </span>
-                  </v-col>
-                </v-row>
-              </template>
-            </div>
-          </v-col>
-          <v-col
-            cols="12"
+            sm="12"
           >
             <v-row>
-              <v-col cols="10">
+              <v-col
+                class="ma-2 pa-3 rounded-lg fields-container"
+              >
+                <div
+                  @dragenter.prevent
+                  @dragover.prevent
+                  @dragleave.prevent
+                  @drop.prevent="onDropOperationField(index)"
+                  @dblclick="removeFieldFromOperationField(index)"
+                >
+                  <template v-if="item.field">
+                    <v-chip
+                      class="ma-2"
+                      color="vtb-color"
+                      outlined
+                      text-color="vtb-color"
+                    >
+                      {{ item.field.name }}
+                    </v-chip>
+                  </template>
+                  <template v-else>
+                    <v-row justify="center">
+                      <v-col cols="auto">
+                        <span class="user-select-none grey--text text--lighten-1 text-h4">
+                          Поле
+                        </span>
+                      </v-col>
+                    </v-row>
+                  </template>
+                </div>
+              </v-col>
+
+            </v-row>
+          </v-col>
+
+          <v-col cols="12">
+            <v-row align="center"
+              class="d-flex flex-nowrap"
+            >
+              <v-col
+                cols="3"
+              >
                 <v-select
                   v-model="item.condition"
-                  rounded
-                  class="background-vtb-l-blue border-vtb-blue"
+                  class="width-select background-vtb-l-blue border-radius"
+                  outlined
                   :items="operations"
-                  title="выбрать операцию фильтра"
-                  label="выбрать операцию фильтра"
+                  hide-details
                 />
               </v-col>
-              <v-col cols="2" />
-            </v-row>
 
-            <v-row>
-              <v-col>
+              <v-col cols="auto">
                 <v-text-field
+                  label="Значение для операции"
+                  class="border-radius"
+                  color="primary"
                   v-model="item.value"
                   hide-details
-                  label="условие поля"
+                  outlined
                 />
+              </v-col>
+
+              <v-spacer></v-spacer>
+
+              <v-col cols="1">
+                <v-btn
+                  icon
+                  color="red"
+                  @click="removeOperation(index)"
+                >
+                  <v-icon>mdi-close</v-icon>
+                </v-btn>
               </v-col>
             </v-row>
           </v-col>
+
         </v-row>
+
+        <div :key="`where-divider-${index}`"
+          class="divider vtb-color-border"
+        ></div>
+        </template>
+
         <v-row>
           <v-col>
             <v-btn
@@ -579,6 +618,12 @@
       removeFieldFromSort(index) {
         this.to_sort_fields.splice(index, 1);
       },
+      removeFieldFromOperationField(index) {
+        this.operations_to_fields[index].field = null;
+      },
+      removeOperation(index) {
+        this.operations_to_fields.splice(index, 1);
+      },
 
       async createTask() {
         const queries = await window.axios.post(
@@ -653,5 +698,13 @@
 
   .border-vtb-blue {
     border: 2px solid #46abf8 !important;
+  }
+
+  .width-select {
+    max-width: 100px;
+  }
+
+  ::v-deep .v-text-field--outlined fieldset {
+    color: #46abf8 !important;
   }
 </style>
