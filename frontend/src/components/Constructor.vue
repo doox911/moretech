@@ -384,6 +384,7 @@
     </v-row>
 
     <v-row
+      v-if="to_selected_fields.length"
       align="center"
       justify="center"
     >
@@ -633,6 +634,8 @@
       },
 
       async createTask() {
+        this.file_task_loading = true;
+
         const queries = await window.axios.post(
           '/api/run_query',
           {
@@ -657,8 +660,6 @@
        * @return {Object} this (VueComponent)
        */
       downloadTaskFile(task_object) {
-        this.file_task_loading = true;
-
         window.axios({
           url: '/api/download_task_file',
           method: 'POST',
