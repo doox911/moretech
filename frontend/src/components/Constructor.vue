@@ -41,7 +41,6 @@
       </v-col>
     </v-row>
     <v-row>
-
       <!-- Selected -->
       <v-col
         class="ma-2 pa-3 rounded-lg fields-container"
@@ -192,6 +191,49 @@
         </v-row>
       </v-col>
     </v-row>
+
+    <!-- result_fields -->
+    <v-row>
+      <v-col>
+        <v-row
+          v-for="(item, index) in result_fields"
+          :key="index"
+          align="center"
+        >
+          <v-col cols="3">
+            <v-text-field
+              v-model="item.name"
+              hide-details
+            />
+          </v-col>
+          <v-col cols="1">
+            =
+          </v-col>
+          <v-col cols="3">
+            <v-text-field
+              v-model="item.formula"
+              hide-details
+              @dragenter.prevent
+              @dragover.prevent
+              @dragleave.prevent
+              @drop.prevent="onDropResultField(item)"
+            />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+            <v-btn
+              color="vtb-color"
+              text
+              rounded
+              @click="addResultField"
+            >
+              Добавить поле
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-col>
+    </v-row>
     <v-row
       align="center"
       justify="center"
@@ -231,6 +273,7 @@
       to_selected_fields: [],
       to_sort_fields: [],
       operations_to_fields: [],
+      result_fields: [],
 
       operations: [
         '>',
@@ -265,6 +308,13 @@
         console.log(datasets);
       },
 
+      addResultField() {
+        this.result_fields.push({
+          name: '',
+          formula: '',
+        });
+      },
+
       addCondition() {
         this.operations_to_fields.push({
           field: null,
@@ -293,6 +343,16 @@
         });
 
         this.to_selected_fields = [...uniqWith(this.to_selected_fields, isEqual)];
+      },
+
+      onDropResultField(item) {
+        const ds_name = item.name = `${this.dragged_dataset.name}.${this.dragged_dataset.name}`;
+
+        if (!item.name) {
+          item.name = `${this.dragged_dataset.name}.${this.dragged_dataset.name}`;
+        }
+
+        item.formula += ds_name;
       },
 
       onDropSortFields() {
