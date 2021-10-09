@@ -167,35 +167,13 @@
                 <v-select
                   v-model="item.condition"
                   rounded
-                  class="width-select background-vtb-l-blue border-vtb-blue"
-                  :items="data_operations"
-                  item-value="id"
-                  item-text="name"
-                  title="выбрать операцию"
-                  label="выбрать операцию"
-                  :loading="loading_data_operations"
-                  :disabled="loading_data_operations"
+                  class="background-vtb-l-blue border-vtb-blue"
+                  :items="operations"
+                  title="выбрать операцию фильтра"
+                  label="выбрать операцию фильтра"
                 />
               </v-col>
-              <v-col cols="2">
-                <v-btn
-                  color="success"
-                  fab
-                  icon
-                  outlined
-                  title="добавить новую операцию"
-                  @click="openAddOperationComponent"
-                >
-                  <v-icon>
-                    mdi-plus
-                  </v-icon>
-                </v-btn>
-
-                <add-data-operation
-                  v-if="show_operation_component"
-                  @close="closeAddOperationComponent"
-                />
-              </v-col>
+              <v-col cols="2" />
             </v-row>
 
             <v-row>
@@ -277,7 +255,34 @@
       >
         <v-card>
           <v-card-title class="mb-3 vtb-color white--text">
-            Операции
+            <v-row justify="space-between">
+              <v-col cols="auto">
+                Операции
+              </v-col>
+              <v-col
+                cols="auto"
+              >
+                <v-btn
+                  color="white"
+                  fab
+                  icon
+                  outlined
+                  :loading="loading_data_operations"
+                  :disabled="loading_data_operations"
+                  title="добавить новую операцию"
+                  @click="openAddOperationComponent"
+                >
+                  <v-icon>
+                    mdi-plus
+                  </v-icon>
+                </v-btn>
+
+                <add-data-operation
+                  v-if="show_operation_component"
+                  @close="closeAddOperationComponent"
+                />
+              </v-col>
+            </v-row>
           </v-card-title>
           <v-card-text>
             <v-chip
@@ -357,12 +362,19 @@
 
       loading_data_operations: false,
       data_operations: [],
+
+      operations: [
+        '+',
+        '-',
+        '/',
+        '*',
+        '=',
+      ],
     }),
     computed: {},
     async mounted() {
       await this.loadDataOperations();
     },
-
     methods: {
 
       /**
@@ -475,16 +487,25 @@
         this.to_sort_fields = [...uniqWith(this.to_sort_fields, isEqual)];
       },
 
+      /**
+       * @param {number} index
+       */
       onDropOperationField(index) {
         this.operations_to_fields[index].field = { ...this.dragged_field };
 
         this.to_sort_fields = [...this.to_sort_fields];
       },
 
+      /**
+       * @param {number} index
+       */
       removeFieldFromSelect(index) {
         this.to_selected_fields.splice(index, 1);
       },
 
+      /**
+       * @param {number} index
+       */
       removeFieldFromSort(index) {
         this.to_sort_fields.splice(index, 1);
       },
@@ -504,9 +525,5 @@
 
   .border-vtb-blue {
     border: 2px solid #46abf8 !important;
-  }
-
-  .width-select {
-
   }
 </style>
