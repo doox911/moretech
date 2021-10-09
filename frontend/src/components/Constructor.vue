@@ -1,7 +1,11 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="auto">
+      <v-col
+        cols="12"
+        md="5"
+        sm="12"
+      >
         <h1>Выберите датасеты</h1>
       </v-col>
       <v-col>
@@ -46,7 +50,7 @@
         sm="6"
         md="4"
       >
-        <v-card>
+        <v-card height="100%">
           <v-card-title class="mb-3 vtb-color white--text">
             <v-row justify="space-between">
               <v-col cols="auto">
@@ -60,6 +64,7 @@
                   fab
                   icon
                   outlined
+                  x-small
                   :loading="loading_data_operations"
                   :disabled="loading_data_operations"
                   title="добавить новую операцию"
