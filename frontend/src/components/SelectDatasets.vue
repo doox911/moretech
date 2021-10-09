@@ -12,6 +12,7 @@
           autocomplete="off"
           return-object
           :loading="loading"
+          :disabled="loading"
           label="Выбор датасетов"
         />
       </v-col>
@@ -142,8 +143,6 @@
       selected_data_sources: [],
 
       loading: false,
-      loading_toast: null,
-      toasts: [],
 
       data_source_dialog: false,
       new_data_source: new DataSource({}),
@@ -240,6 +239,8 @@
        * Загружает сохранённые датасеты
        */
       async loadDefaultDatasets() {
+        this.loading = true;
+
         window.axios.get('/api/datasource').then(response => {
           this.data_sources = response.data.content.data_sources.map(data => {
             return new DataSource(data);
@@ -249,8 +250,6 @@
         }).finally(() => {
           this.loading = false;
         });
-
-        this.loading = false;
       },
 
     },

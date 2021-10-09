@@ -30,6 +30,7 @@ Route::prefix('/data_operation')->group(static function () {
   Route::post('', [MetaDataController::class, 'storeDataOperation']);
 });
 
+Route::post('/download_task_file', [MetaDataController::class, 'downloadTaskFile']);
 
 Route::get('catalogs', [MetaDataController::class, 'getCatalogs']);
 Route::get('datasets', [MetaDataController::class, 'getDatasets']);

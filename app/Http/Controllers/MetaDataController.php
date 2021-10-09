@@ -15,7 +15,10 @@ use App\Models\DataSource;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use JsonException;
 use Throwable;
 use CommandService;
 
@@ -29,6 +32,25 @@ class MetaDataController {
   }
 
   /**
+   * Отдаёт в браузер JSON-файл с заданием
+   *
+   * @param Request $request
+   * @return Response
+   * @throws JsonException
+   */
+  public function downloadTaskFile(Request $request): Response {
+    $task = json_encode($request->input('task'), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
+
+    $filename = 'datahub_task';
+
+    return response($task)
+      ->header('filename', $filename . '.json')
+      ->header('Content-Type', 'application/json');
+  }
+
+
+  /**
+   * Создаёт источник датасета
    *
    * @param DataSourceRequest $request
    * @return JsonResponse
@@ -46,9 +68,9 @@ class MetaDataController {
   }
 
   /**
+   * Возвращает список источников датасетов
    *
    * @return JsonResponse
-   * @description Возврващает список датасетов
    */
   public function getDataSources(): JsonResponse {
     return response()->json([
@@ -59,11 +81,11 @@ class MetaDataController {
   }
 
   /**
+   * Добавляет источник датасета
    *
    * @param string $name
    * @param string $url
    * @return JsonResponse
-   * @description Возвращает список датасетов
    */
   public function addDataSource(string $name, string $url): JsonResponse {
     $data_source = DataSource::create([
@@ -77,8 +99,6 @@ class MetaDataController {
       ]
     ]);
   }
-
-
 
   /**
    * Сохраняет операцию на данными
@@ -100,9 +120,9 @@ class MetaDataController {
   }
 
   /**
+   * Возвращает список операций над данными датасетов
    *
    * @return JsonResponse
-   * @description Возвращает список операций над данными датасетов
    */
   public function getDataOperations(): JsonResponse {
     return response()->json([
@@ -113,11 +133,11 @@ class MetaDataController {
   }
 
   /**
+   * Добавляет операцию над данными датасетов
    *
    * @param string $name
    * @param string $formula
    * @return JsonResponse
-   * @description Добавляет операцию над данными датасетов
    */
   public function addDataOperation(string $name, string $formula): JsonResponse {
     $data_process = DataOperation::create([
@@ -133,12 +153,10 @@ class MetaDataController {
     ]);
   }
 
-
-
   /**
+   * Возвращает список датасетов
    *
    * @return JsonResponse
-   * @description Возврващает список датасетов
    * @throws GuzzleException
    */
   public function getDatasets(): JsonResponse {

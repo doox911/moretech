@@ -349,9 +349,15 @@
           color="vtb-color"
           text
           rounded
+          :disabled="file_task_loading"
           @click="createTask"
         >
-          Сформировать задание
+          {{ download_file_task_button_text }}&nbsp;
+          <v-progress-circular
+            v-if="file_task_loading"
+            indeterminate
+            color="primary"
+          />
         </v-btn>
       </v-col>
     </v-row>
@@ -407,8 +413,19 @@
         '*',
         '=',
       ],
+
+      file_task_loading: false,
     }),
-    computed: {},
+    computed: {
+
+      /**
+       * @return {string}
+       */
+      download_file_task_button_text() {
+        return this.file_task_loading ? 'Формируется файл с заданием' : 'Сформировать задание';
+      },
+
+    },
     async mounted() {
       await this.loadDataOperations();
     },
@@ -431,15 +448,23 @@
         });
       },
 
+      /**
+       * Открывает окно компонента добавления операции для применения к данным датасетов
+       */
       openAddOperationComponent() {
         this.show_operation_component = true;
       },
 
+      /**
+       * Закрывает окно компонента добавления операции для применения к данным датасетов
+       */
       closeAddOperationComponent() {
         this.show_operation_component = false;
       },
 
       /**
+       * Открывает датасеты для работы с ними
+       *
        * @param {Array<DataSet>} datasets
        */
       openDatasets(datasets) {
@@ -555,13 +580,54 @@
         this.to_sort_fields.splice(index, 1);
       },
 
-      async createTask() {
-        await window.axios.post('/api/run_query', {
-          result_fields: this.result_fields,
-          select: this.to_selected_fields,
-          where: this.operations_to_fields,
-          sort: this.to_sort_fields,
+      createTask() {
+        const task_object = { name: 1, test: [1, 2, 4], qwe: { rrr: 22 } };
+
+        this.downloadTaskFile(task_object);
+      },
+
+      /**
+       * Формирует объект задания на выборку датасета
+       *
+       * @param {Object} task_object
+       * @return {Object} this (VueComponent)
+       */
+      downloadTaskFile(task_object) {
+        this.file_task_loading = true;
+
+        window.axios({
+          url: '/api/download_task_file',
+          method: 'POST',
+          responseType: 'blob',
+          data: {
+            task: task_object,
+          },
+        }).then(response => {
+          const task_filename = response.headers.filename;
+          const task_blob = new Blob([response.data]);
+
+          this.downloadBlob(task_blob, `${task_filename}`);
+        }).finally(() => {
+          this.file_task_loading = false;
         });
+      },
+
+      /**
+       * Скачивает блоб-файл
+       *
+       * @param {Blob} blob - блоб-объект
+       * @param {string} filename - название файла
+       * @return {Object} this (VueComponent)
+       */
+      downloadBlob(blob, filename) {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        link.href = url;
+        link.setAttribute('download', filename);
+        link.click();
+
+        return this;
       },
     },
   };
