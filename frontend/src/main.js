@@ -9,6 +9,8 @@ import 'vue-toast-notification/dist/theme-sugar.css';
 
 Vue.use(VueToast);
 
+import './assets/index.scss';
+
 Vue.config.productionTip = false;
 
 new Vue({
