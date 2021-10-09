@@ -41,7 +41,6 @@
       </v-col>
     </v-row>
     <v-row>
-
       <!-- Selected -->
       <v-col
         class="ma-2 pa-3 rounded-lg fields-container"
@@ -161,21 +160,53 @@
             </div>
           </v-col>
           <v-col
-            cols="auto"
+            cols="12"
           >
-            <v-select
-              v-model="item.condition"
+            <v-row>
+              <v-col cols="10">
+                <v-select
+                  v-model="item.condition"
+                  rounded
+                  class="width-select background-vtb-l-blue border-vtb-blue"
+                  :items="data_operations"
+                  item-value="id"
+                  item-text="name"
+                  title="выбрать операцию"
+                  label="выбрать операцию"
+                  :loading="loading_data_operations"
+                  :disabled="loading_data_operations"
+                />
+              </v-col>
+              <v-col cols="2">
+                <v-btn
+                  color="success"
+                  fab
+                  icon
+                  outlined
+                  title="добавить новую операцию"
+                  @click="openAddOperationComponent"
+                >
+                  <v-icon>
+                    mdi-plus
+                  </v-icon>
+                </v-btn>
 
-              rounded
-              class="width-select background-vtb-l-blue border-vtb-blue"
-              :items="operations"
-            />
-          </v-col>
-          <v-col>
-            <v-text-field
-              v-model="item.value"
-              hide-details
-            />
+                <add-data-operation
+                  v-if="show_operation_component"
+                  @close="closeAddOperationComponent"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col>
+                <v-text-field
+                  v-model="item.value"
+                  hide-details
+                  label="условие поля"
+                />
+              </v-col>
+            </v-row>
           </v-col>
         </v-row>
         <v-row>
@@ -212,16 +243,24 @@
 
 <script>
 
+  /**
+   * Functions
+   */
   import { isEqual, uniqWith } from 'lodash';
-  import SelectDatasets from './SelectDatasets';
+
+  /**
+   * Components
+   */
+  import SelectDatasets from 'Components/SelectDatasets';
+  import AddDataOperation from 'Components/AddDataOperation';
+  import DataOperation from 'Classes/DataOperation';
 
   export default {
     name: 'Constructor',
-
     components: {
       SelectDatasets,
+      AddDataOperation,
     },
-
     data: () => ({
       datasets: [],
       dragged_dataset: [],
@@ -232,33 +271,46 @@
       to_sort_fields: [],
       operations_to_fields: [],
 
-      operations: [
-        '>',
-        '<',
-        '=',
-      ],
+      show_operation_component: false,
+
+      loading_data_operations: false,
+      data_operations: [],
     }),
-
     computed: {},
-
     async mounted() {
-      // const path = 'https://datahub.io/core/population/datapackage.json';
-      //
-      // const response = await fetch(path);
-      //
-      // const data = await response.json();
-      //
-      // const schemas = data.resources.map(r => r.schema).filter(e => !!e);
-      //
-      // this.datasets.push({
-      //   name: data.name,
-      //   schemas,
-      // });
-      //
-      // console.log(this.datasets);
+      await this.loadDataOperations();
     },
 
     methods: {
+
+      /**
+       * Загружает сохранённые операции над полями датасетов
+       */
+      async loadDataOperations() {
+        this.loading_data_operations = true;
+
+        window.axios.get('/api/data_operation').then(response => {
+          this.data_operations = response.data.content.data_operations.map(data => {
+            return new DataOperation(data);
+          });
+        }).catch(errors => {
+          console.error(errors.response.data.messages);
+        }).finally(() => {
+          this.loading_data_operations = false;
+        });
+      },
+
+      openAddOperationComponent() {
+        this.show_operation_component = true;
+      },
+
+      closeAddOperationComponent() {
+        this.show_operation_component = false;
+      },
+
+      /**
+       * @param {Array<DataSet>} datasets
+       */
       openDatasets(datasets) {
         this.datasets.push(...datasets);
 
@@ -327,7 +379,6 @@
 </script>
 
 <style scoped>
-
   .fields-container {
     min-height: 3.2em;
     border: 2px dashed #46abf8;
@@ -338,6 +389,6 @@
   }
 
   .width-select {
-    max-width: 100px;
+
   }
 </style>

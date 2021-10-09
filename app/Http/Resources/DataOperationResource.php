@@ -12,11 +12,12 @@ class DataOperationResource extends JsonResource {
     /**
      * @var DataOperation $operation
      */
-    $operation = $this->resource;
+    $data_operation = $this->resource;
 
     return [
-      'name' => $operation->name,
-      'formula' => $operation->formula,
+      'name' => $data_operation->name,
+      'formula' => $data_operation->formula,
+      'canonical_name' => $data_operation->canonical_name,
     ];
   }
 }
