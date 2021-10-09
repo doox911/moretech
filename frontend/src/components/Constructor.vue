@@ -570,6 +570,10 @@
       onDropResultField(item) {
         let ds_name = '';
 
+        if (item.formula === undefined) {
+          item.formula = '';
+        }
+
         if (this.dragged_data_operation) {
           ds_name = this.dragged_data_operation.formula;
         } else {
@@ -597,7 +601,7 @@
        * @param {number} index
        */
       onDropOperationField(index) {
-        this.operations_to_fields[index].field = { ...this.dragged_field, ...this.dragged_dataset };
+        this.operations_to_fields[index].field = { ...this.dragged_field, dataset_name: this.dragged_dataset.name };
 
         this.to_sort_fields = [...this.to_sort_fields];
       },
