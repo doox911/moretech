@@ -40,6 +40,7 @@
         </v-card>
       </v-col>
     </v-row>
+
     <v-row>
       <!-- Selected -->
       <v-col
@@ -223,6 +224,36 @@
         </v-row>
       </v-col>
     </v-row>
+
+    <v-row>
+      <v-col
+        cols="12"
+        sm="6"
+        md="4"
+      >
+        <v-card>
+          <v-card-title class="mb-3 vtb-color white--text">
+            Операции
+          </v-card-title>
+          <v-card-text>
+            <v-chip
+              v-for="(data_operation, data_operation_index) in data_operations"
+              :key="data_operation_index"
+              class="ma-1"
+              color="vtb-color"
+              outlined
+              text-color="vtb-color"
+              :draggable="true"
+              @dragstart="onDragStartDataOperation(data_operation, data_operation_index)"
+              @dragend="onDragEndDataOperation()"
+            >
+              {{ data_operation.name }} ({{ data_operation.formula }})
+            </v-chip>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+
     <v-row
       align="center"
       justify="center"
@@ -266,6 +297,12 @@
       dragged_dataset: [],
       dragged_field: null,
       dragged_field_index: null,
+
+      /**
+       * Поля для перестаскивания операций
+       */
+      dragged_data_operation: null,
+      dragged_data_operation_index: null,
 
       to_selected_fields: [],
       to_sort_fields: [],
@@ -335,6 +372,25 @@
         this.dragged_dataset = null;
         this.dragged_field = null;
         this.dragged_field_index = null;
+      },
+
+      /**
+       * Срабатывает при перетаскивании мышки с чипсом операцией
+       *
+       * @param {DataOperation} data_operation
+       * @param {number} data_operation_index
+       */
+      onDragStartDataOperation(data_operation, data_operation_index) {
+        this.dragged_data_operation = data_operation;
+        this.dragged_data_operation_index = data_operation_index;
+      },
+
+      /**
+       * Срабатывает при отпускании мышки с чипсом операцией
+       */
+      onDragEndDataOperation() {
+        this.dragged_data_operation = null;
+        this.dragged_data_operation_index = null;
       },
 
       onDropSelectedFields() {
