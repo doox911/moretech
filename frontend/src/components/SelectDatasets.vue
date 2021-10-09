@@ -3,8 +3,8 @@
     <v-row>
       <v-col cols="2">
         <v-autocomplete
-          v-model="selected_default_datasets"
-          :items="default_datasets"
+          v-model="selected_data_sources"
+          :items="data_sources"
           item-value="id"
           item-text="name"
           persistent-hint
@@ -17,7 +17,7 @@
         <v-btn
           text
           color="teal accent-4"
-          :disabled="!selected_default_datasets || selected_default_datasets.length === 0"
+          :disabled="is_enable_button_open_datasets"
           @click="openDataset"
         >
           открыть датасеты
@@ -32,11 +32,19 @@
   /**
    * Classes
    */
-  import DataSet from 'Classes/DataSet';
+  import DataSource from 'Classes/DataSource';
 
   export default {
     name: 'SelectDatasets',
     data: () => ({
+
+      /**
+       * Источники датасетов
+       *
+       * @return {Array<DataSource>}
+       */
+      data_sources: [],
+
       /**
        * Датасеты из интернета
        *
@@ -45,11 +53,11 @@
       default_datasets: [],
 
       /**
-       * Выбранные датасеты
+       * Выбранные источники данных
        *
-       * @return {Array<DataSet>}
+       * @return {Array<DataSource>}
        */
-      selected_default_datasets: [],
+      selected_data_sources: [],
 
       loading: false,
       loading_toast: null,
@@ -57,12 +65,18 @@
     }),
     computed: {
 
-      collections_dataset_from_internet() {
-        return [
-          'country-list',
-          'population',
-          'covid-19',
-        ];
+      is_enable_button_open_datasets() {
+        return !this.selected_data_sources ||
+          this.selected_data_sources.some(ds => !ds.loaded) ||
+          this.selected_data_sources.length === 0;
+      },
+    },
+    watch: {
+
+      selected_data_sources() {
+        this.selected_data_sources.map(data_source => {
+          data_source.loadDataSet();
+        });
       },
     },
     async mounted() {
@@ -79,11 +93,11 @@
       },
 
       openDataset() {
-        this.$emit('openDatasets', this.selected_default_datasets.map(ds => ds.getCopy()));
+        this.$emit('openDatasets', this.selected_data_sources.map(data_source => data_source.dataset.getCopy()));
 
-        this.selected_default_datasets.map(dataset => {
+        this.selected_data_sources.map(data_source => {
           const toast = this.$toast.open({
-            message: 'Датасет ' + dataset.name + ' готов к использованию',
+            message: 'Датасет ' + data_source.dataset.name + ' готов к использованию',
             type: 'success',
             duration: 6000,
             // all of other options may go here
@@ -92,14 +106,18 @@
           this.toasts.push(toast);
         });
 
-        this.selected_default_datasets = [];
+        this.selected_data_sources = [];
       },
 
       async loadDefaultDatasets() {
-        this.collections_dataset_from_internet.map(async dataset_name => {
-          const url = `https://datahub.io/core/${dataset_name}/datapackage.json`;
-
-          this.default_datasets.push(await DataSet.fromUrl(url));
+        window.axios.get('/api/datasource').then(response => {
+          this.data_sources = response.data.content.data_sources.map(data => {
+            return new DataSource(data);
+          });
+        }).catch(errors => {
+          console.error(errors.response.data.messages);
+        }).finally(() => {
+          this.loading = false;
         });
 
         this.loading = false;
