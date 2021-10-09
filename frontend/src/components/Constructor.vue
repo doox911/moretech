@@ -392,21 +392,27 @@
         });
       },
 
+      /**
+       * Открывает окно компонента добавления операции для применения к данным датасетов
+       */
       openAddOperationComponent() {
         this.show_operation_component = true;
       },
 
+      /**
+       * Закрывает окно компонента добавления операции для применения к данным датасетов
+       */
       closeAddOperationComponent() {
         this.show_operation_component = false;
       },
 
       /**
+       * Открывает датасеты для работы с ними
+       *
        * @param {Array<DataSet>} datasets
        */
       openDatasets(datasets) {
         this.datasets.push(...datasets);
-
-        console.log(datasets);
       },
 
       addResultField() {
