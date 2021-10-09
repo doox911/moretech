@@ -577,10 +577,10 @@
         if (this.dragged_data_operation) {
           ds_name = this.dragged_data_operation.formula;
         } else {
-          ds_name = `${this.dragged_dataset.name}.${this.dragged_field.name}`;
+          ds_name = `[${this.dragged_dataset.name}.${this.dragged_field.name}]`;
 
           if (!item.name) {
-            item.name = `\`${ds_name}\``;
+            item.name = `\`${this.dragged_dataset.name}.${this.dragged_field.name}\``;
           }
         }
 
