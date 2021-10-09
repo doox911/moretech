@@ -14,17 +14,23 @@
       <v-col
         v-for="(dataset, index) in datasets"
         :key="index"
-        cols="3"
+        cols="12"
+        sm="6"
+        md="4"
       >
         <v-card>
-          <v-card-title> {{ dataset.name }}</v-card-title>
+          <v-card-title class="light-blue lighten-1">
+            {{ dataset.name }}
+          </v-card-title>
           <v-card-text>
             <v-chip
               v-for="(field, field_index) in dataset.schema.fields"
               :key="field_index"
               class="ma-1"
+              color="light-blue"
+              text-color="white"
               :draggable="true"
-              @dragstart="onDragStart(field, field_index)"
+              @dragstart="onDragStart(field, field_index, dataset)"
               @dragend="onDragEnd()"
             >
               {{ field.name }}({{ field.type }})
@@ -49,6 +55,8 @@
             v-for="(field, index) in to_selected_fields"
             :key="index"
             class="ma-2"
+            color="light-blue"
+            text-color="white"
             @dblclick="removeFieldFromSelect(index)"
           >
             {{ field.name }}
@@ -82,6 +90,8 @@
             v-for="(field, index) in to_sort_fields"
             :key="index"
             class="ma-2"
+            color="light-blue"
+            text-color="white"
             @dblclick="removeFieldFromSort(index)"
           >
             {{ field.name }}
@@ -106,8 +116,12 @@
         <v-row
           v-for="(item, index) in operations_to_fields"
           :key="index"
+          align="center"
         >
-          <v-col>
+          <v-col
+            cols="12"
+            class="ma-2 pa-3 rounded-lg fields-container"
+          >
             <div
               @dragenter.prevent
               @dragover.prevent
@@ -116,7 +130,9 @@
             >
               <template v-if="item.field">
                 <v-chip
+                  color="light-blue"
                   class="ma-2"
+                  text-color="white"
                 >
                   {{ item.field.name }}
                 </v-chip>
@@ -125,28 +141,37 @@
                 <v-row justify="center">
                   <v-col cols="auto">
                     <span class="user-select-none grey--text text--lighten-1 text-h4">
-                      Свойство датасета
+                      Поле
                     </span>
                   </v-col>
                 </v-row>
               </template>
             </div>
           </v-col>
-          <v-col>
+          <v-col
+            cols="auto"
+          >
             <v-select
               v-model="item.condition"
+
+              rounded
+              class="width-select background-vtb-l-blue border-vtb-blue"
               :items="operations"
             />
           </v-col>
           <v-col>
             <v-text-field
               v-model="item.value"
+              hide-details
             />
           </v-col>
         </v-row>
         <v-row>
           <v-col>
             <v-btn
+              color="light-blue"
+              text
+              rounded
               @click="addCondition"
             >
               Добавить условие
@@ -160,10 +185,7 @@
 
 <script>
 
-  /**
-   * Classes
-   */
-
+  import { isEqual, uniqWith } from 'lodash';
   import SelectDatasets from './SelectDatasets';
 
   export default {
@@ -175,6 +197,7 @@
 
     data: () => ({
       datasets: [],
+      dragged_dataset: [],
       dragged_field: null,
       dragged_field_index: null,
 
@@ -210,7 +233,7 @@
 
     methods: {
       openDatasets(datasets) {
-        this.datasets = datasets;
+        this.datasets.push(...datasets);
 
         console.log(datasets);
       },
@@ -223,29 +246,39 @@
         });
       },
 
-      onDragStart(field, field_index) {
+      onDragStart(field, field_index, dataset) {
+        this.dragged_dataset = dataset;
         this.dragged_field = field;
         this.dragged_field_index = field_index;
       },
 
       onDragEnd() {
+        this.dragged_dataset = null;
         this.dragged_field = null;
         this.dragged_field_index = null;
       },
 
-      async onDropSelectedFields() {
-        this.to_selected_fields.push({ ...this.dragged_field });
+      onDropSelectedFields() {
+        this.to_selected_fields.push({
+          ...this.dragged_field,
+          dataset_id: this.dragged_dataset.id,
+          dataset_name: this.dragged_dataset.name,
+        });
 
-        this.to_selected_fields = [...this.to_selected_fields];
+        this.to_selected_fields = [...uniqWith(this.to_selected_fields, isEqual)];
       },
 
-      async onDropSortFields() {
-        this.to_sort_fields.push({ ...this.dragged_field });
+      onDropSortFields() {
+        this.to_sort_fields.push({
+          ...this.dragged_field,
+          dataset_id: this.dragged_dataset.id,
+          dataset_name: this.dragged_dataset.name,
+        });
 
-        this.to_sort_fields = [...this.to_sort_fields];
+        this.to_sort_fields = [...uniqWith(this.to_sort_fields, isEqual)];
       },
 
-      async onDropOperationField(index) {
+      onDropOperationField(index) {
         this.operations_to_fields[index].field = { ...this.dragged_field };
 
         this.to_sort_fields = [...this.to_sort_fields];
@@ -267,5 +300,17 @@
   .fields-container {
     min-height: 3.2em;
     border: 2px dashed #03A9F4;
+  }
+
+  .background-vtb-l-blue {
+    background-color: #B3E5FC !important;
+  }
+
+  .border-vtb-blue {
+    border: 2px solid #03A9F4 !important;
+  }
+
+  .width-select {
+    max-width: 100px;
   }
 </style>
