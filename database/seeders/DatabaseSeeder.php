@@ -6,13 +6,21 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
+  /**
+   * Seed the application's database.
+   *
+   * @return void
+   */
+  public function run()
+  {
+
     /**
-     * Seed the application's database.
+     * Запускать при инициализации приложения
      *
-     * @return void
+     * Порядок важен.
      */
-    public function run()
-    {
-        // \App\Models\User::factory(10)->create();
-    }
+    $this->call([
+      CreateDefaultUsersAndPermissions::class,
+    ]);
+  }
 }

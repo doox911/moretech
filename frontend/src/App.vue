@@ -1,8 +1,10 @@
 <template>
   <v-app>
     <v-app-bar
+      v-if="isAuth"
       class="black"
       app
+      :value="v_navigation_drawer"
     >
       <div class="d-flex align-center">
         <v-img
@@ -24,8 +26,17 @@
 
 <script>
 
+  /**
+   * Mixins
+   */
+  import AuthMixin from './mixins/auth/AuthMixin';
+
   export default {
     name: 'App',
+
+    mixins: [
+      AuthMixin,
+    ],
 
     data: () => ({
     //

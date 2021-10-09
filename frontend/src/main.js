@@ -8,14 +8,29 @@ import VueToast from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 
 import './assets/index.scss';
+import preloadStore from './store/preloadStore';
 
 Vue.use(VueToast);
 
 Vue.config.productionTip = false;
 
-new Vue({
-  router,
-  store,
-  vuetify,
-  render: h => h(App),
-}).$mount('#app');
+/**
+ * Запуск приложения
+ */
+async function run() {
+  try {
+    await window.axios.get('/sanctum/csrf-cookie');
+  } catch (e) {
+  }
+
+  await preloadStore();
+
+  new Vue({
+    router,
+    store,
+    vuetify,
+    render: h => h(App),
+  }).$mount('#app');
+}
+
+run().then(() => 'Приложение загружено');

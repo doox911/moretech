@@ -1,0 +1,4 @@
+export const ActionTypes = Object.freeze({
+  USERS: 'USERS',
+  USERS_WITH_ROLES_AND_PERMISSIONS: 'USERS_WITH_ROLES_AND_PERMISSIONS',
+});
