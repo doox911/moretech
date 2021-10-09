@@ -13,4 +13,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/{any}', 'FrontendController@index')->where('any', '.*');
+Route::get('ttt', function () {
+  dd('tt');
+});

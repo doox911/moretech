@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\MetaDataController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +14,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('/datasource')->group(static function () {
+  Route::get('', [MetaDataController::class, 'getDataSources']);
+  //Route::post('', [ErpProcessController::class, 'store']);
+
+  // Route::prefix('{erp_process}')->group(function () {
+  //   Route::put('', [ErpProcessController::class, 'update']);
+  //   Route::patch('set_parent', [ErpProcessController::class, 'setParent']);
+  //   Route::delete('', [ErpProcessController::class, 'destroy']);
+  // });
 });
+
+
+Route::get('catalogs', [MetaDataController::class, 'getCatalogs']);
+Route::get('datasets', [MetaDataController::class, 'getDatasets']);
+Route::post('run_query', [MetaDataController::class, 'runQuery']);
