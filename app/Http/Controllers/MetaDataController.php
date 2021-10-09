@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DataOperationRequest;
 use App\Http\Requests\DataSourceRequest;
+use App\Http\Resources\DataOperationResource;
+use App\Models\DataOperation;
 use App\Services\MetaDataService;
 use App\Classes\DataSetsGetter;
 use App\Classes\MetaDataGetter;
@@ -12,9 +15,17 @@ use App\Models\DataSource;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Throwable;
 
 class MetaDataController {
+
+  private $user = null;
+
+
+  public function __construct() {
+    $this->user = Auth::user();
+  }
 
   /**
    *
@@ -65,6 +76,63 @@ class MetaDataController {
       ]
     ]);
   }
+
+
+
+  /**
+   * Сохраняет операцию на данными
+   *
+   * @param DataOperationRequest $request
+   * @return JsonResponse
+   * @throws Throwable
+   */
+  public function storeDataOperation(DataOperationRequest $request): JsonResponse {
+    $data = $request->validated();
+    $data['user_id'] = $this->user->id ?? null;
+
+    return response()->json([
+      'messages' => ['Операция успешно сохранена'],
+      'content' => [
+        'new_data_operation' => DataOperation::create($data),
+      ]
+    ]);
+  }
+
+  /**
+   *
+   * @return JsonResponse
+   * @description Возвращает список операций над данными датасетов
+   */
+  public function getDataOperations(): JsonResponse {
+    return response()->json([
+      'content' => [
+        'data_operations' => DataOperationResource::collection(MetaDataService::getDataOperations()),
+      ]
+    ]);
+  }
+
+  /**
+   *
+   * @param string $name
+   * @param string $formula
+   * @return JsonResponse
+   * @description Добавляет операцию над данными датасетов
+   */
+  public function addDataOperation(string $name, string $formula): JsonResponse {
+    $data_process = DataOperation::create([
+      'name' => $name,
+      'formula' => $formula,
+      'user_id' => $this->user->id ?? null,
+    ]);
+
+    return response()->json([
+      'content' => [
+        'data_process' => DataOperationResource::make($data_process),
+      ]
+    ]);
+  }
+
+
 
   /**
    *
