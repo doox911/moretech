@@ -21,7 +21,7 @@
             >
               <v-text-field
                 v-model="new_data_operation.name"
-                label="Название датасета"
+                label="Название операции"
                 hide-details
               />
             </v-col>
