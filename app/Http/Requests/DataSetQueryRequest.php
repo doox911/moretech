@@ -19,9 +19,9 @@ class DataSetQueryRequest extends FormRequest {
 
       'where' => 'required|array',
       'where.*.field' => 'required|array',
-      'where.*.field.*.field_name' => 'required|string',
-      'where.*.field.*.field_type' => 'required|string',
-      'where.*.field.*.dataset_name' => 'required|string',
+      'where.*.field.field_name' => 'required|string',
+      'where.*.field.field_type' => 'required|string',
+      'where.*.field.dataset_name' => 'required|string',
       'where.*.condition' => 'required|string',
       'where.*.value' => 'required|string',
 
