@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('/datasource')->group(static function () {
   Route::get('', [MetaDataController::class, 'getDataSources']);
-  //Route::post('', [ErpProcessController::class, 'store']);
+  Route::post('', [MetaDataController::class, 'storeDataSource']);
 
   // Route::prefix('{erp_process}')->group(function () {
   //   Route::put('', [ErpProcessController::class, 'update']);
