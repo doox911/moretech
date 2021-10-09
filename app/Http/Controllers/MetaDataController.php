@@ -6,6 +6,7 @@ use App\Http\Requests\DataOperationRequest;
 use App\Http\Requests\DataSourceRequest;
 use App\Http\Resources\DataOperationResource;
 use App\Models\DataOperation;
+use App\Services\CommandService;
 use App\Services\MetaDataService;
 use App\Classes\DataSetsGetter;
 use App\Classes\MetaDataGetter;
@@ -20,7 +21,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use JsonException;
 use Throwable;
-use CommandService;
 
 class MetaDataController {
 
@@ -208,14 +208,19 @@ class MetaDataController {
     ]);
   }
 
-  public function runQuery(DataSetQueryRequest $request) {
+  /**
+   * @param \App\Http\Requests\DataSetQueryRequest $request
+   * @return \Illuminate\Http\JsonResponse
+   */
+  public function runQuery(DataSetQueryRequest $request): JsonResponse {
     $data = $request->validated();
+
 
     $select_fields = $data['select'];
 
     $queries = [];
     foreach ($select_fields as $select_field) {
-      $field = $select_field['dataset_name'] . '.' . $select_field['field_name'];
+      $field = '\`' . $select_field['dataset_name'] . '\`.\`' . $select_field['name'] . '\`';
       if (!isset($queries[$select_field['dataset_name']])) {
         $queries[$select_field['dataset_name']] = "select $field";
       } else {
@@ -224,7 +229,6 @@ class MetaDataController {
     }
 
 
-    // todo where
     $where_fields = $data['where'];
     foreach ($where_fields as $where_field) {
       $query = &$queries[$where_field['field']['dataset_name']];
@@ -238,14 +242,13 @@ class MetaDataController {
       } else {
         $query .= " and ";
       }
-      $field = $where_field['field']['dataset_name'] . '.' . $where_field['field']['field_name'];
+      $field = '\`' . $where_field['field']['dataset_name'] . '\`.\`' . $where_field['field']['name'] . '\`';
 
       $query .= "$field {$where_field['condition']} {$where_field['value']}";
     }
 
     unset($query);
 
-    // todo sort
     $sort_fields = $data['sort'];
 
     foreach ($sort_fields as $sort_field) {
@@ -259,12 +262,12 @@ class MetaDataController {
         $query .= " from {$sort_field['dataset_name']}";
       }
 
-      $field = $sort_field['dataset_name'] . '.' . $sort_field['field_name'];
+      $field = '\`' . $sort_field['dataset_name'] . '\`.\`' . $sort_field['name'] . '\`';
 
       if (!strstr($query, 'order by')) {
-        $query .= " ORDER BY $field";
+        $query .= " ORDER BY \`$field\`";
       } else {
-        $query .= ", $field";
+        $query .= ",  \`$field\`";
       }
     }
 

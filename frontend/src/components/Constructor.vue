@@ -540,7 +540,7 @@
           ds_name = `${this.dragged_dataset.name}.${this.dragged_field.name}`;
 
           if (!item.name) {
-            item.name = ds_name;
+            item.name = `\`${ds_name}\``;
           }
         }
 
@@ -580,8 +580,20 @@
         this.to_sort_fields.splice(index, 1);
       },
 
-      createTask() {
-        const task_object = { name: 1, test: [1, 2, 4], qwe: { rrr: 22 } };
+      async createTask() {
+        const queries = await window.axios.post(
+          '/api/run_query',
+          {
+            select: this.to_selected_fields,
+            where: this.operations_to_fields,
+            sort: this.to_sort_fields,
+          },
+        );
+
+        const task_object = {
+          result_fields: this.result_fields,
+          queries: queries.data.content.queries,
+        };
 
         this.downloadTaskFile(task_object);
       },
