@@ -39,6 +39,61 @@
           </v-card-text>
         </v-card>
       </v-col>
+      <!-- operations -->
+      <v-col
+        v-if="datasets.length"
+        cols="12"
+        sm="6"
+        md="4"
+      >
+        <v-card>
+          <v-card-title class="mb-3 vtb-color white--text">
+            <v-row justify="space-between">
+              <v-col cols="auto">
+                Операции
+              </v-col>
+              <v-col
+                cols="auto"
+              >
+                <v-btn
+                  color="white"
+                  fab
+                  icon
+                  outlined
+                  :loading="loading_data_operations"
+                  :disabled="loading_data_operations"
+                  title="добавить новую операцию"
+                  @click="openAddOperationComponent"
+                >
+                  <v-icon>
+                    mdi-plus
+                  </v-icon>
+                </v-btn>
+
+                <add-data-operation
+                  v-if="show_operation_component"
+                  @close="closeAddOperationComponent"
+                />
+              </v-col>
+            </v-row>
+          </v-card-title>
+          <v-card-text>
+            <v-chip
+              v-for="(data_operation, data_operation_index) in data_operations"
+              :key="data_operation_index"
+              class="ma-1"
+              color="vtb-color"
+              outlined
+              text-color="vtb-color"
+              :draggable="true"
+              @dragstart="onDragStartDataOperation(data_operation, data_operation_index)"
+              @dragend="onDragEndDataOperation()"
+            >
+              {{ data_operation.name }} ({{ data_operation.formula }})
+            </v-chip>
+          </v-card-text>
+        </v-card>
+      </v-col>
     </v-row>
     <v-row>
       <!-- Selected -->
@@ -203,103 +258,85 @@
     </v-row>
 
     <!-- result_fields -->
-    <v-row>
-      <v-col>
-        <v-row
-          v-for="(item, index) in result_fields"
-          :key="index"
-          align="center"
-        >
-          <v-col cols="3">
-            <v-text-field
-              v-model="item.name"
-              clearable
-              hide-details
-            />
-          </v-col>
-          <v-col cols="1">
-            =
-          </v-col>
-          <v-col cols="3">
-            <v-text-field
-              v-model="item.formula"
-              clearable
-              hide-details
-              @dragenter.prevent
-              @dragover.prevent
-              @dragleave.prevent
-              @drop.prevent="onDropResultField(item)"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col>
-            <v-btn
-              color="vtb-color"
-              text
-              rounded
-              @click="addResultField"
-            >
-              Добавить поле
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-col>
-    </v-row>
-
-    <v-row>
-      <v-col
-        cols="12"
-        sm="6"
-        md="4"
-      >
-        <v-card>
-          <v-card-title class="mb-3 vtb-color white--text">
-            <v-row justify="space-between">
-              <v-col cols="auto">
-                Операции
-              </v-col>
-              <v-col
-                cols="auto"
+    <v-row v-if="datasets.length">
+      <v-col class="ma-2 pa-3 rounded-lg fields-container">
+        <template v-if="result_fields.length">
+          <v-row
+            v-for="(item, index) in result_fields"
+            :key="index"
+            align="center"
+          >
+            <v-col cols="2">
+              <v-text-field
+                v-model="item.name"
+                clearable
+                label="Наименование поля"
+              />
+            </v-col>
+            <v-col cols="auto">
+              <span class="user-select-none grey--text text--lighten-1 text-h4">
+                =
+              </span>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                v-model="item.formula"
+                clearable
+                label="Перетащите поля или операции"
+                hint="Составление формулы"
+                persistent-hint
+                @dragenter.prevent
+                @dragover.prevent
+                @dragleave.prevent
+                @drop.prevent="onDropResultField(item)"
+              />
+            </v-col>
+            <v-col cols="auto">
+              <v-btn
+                color="vtb-color"
+                fab
+                rounded
+                icon
+                @click="removeResultField(index)"
               >
-                <v-btn
-                  color="white"
-                  fab
-                  icon
-                  outlined
-                  :loading="loading_data_operations"
-                  :disabled="loading_data_operations"
-                  title="добавить новую операцию"
-                  @click="openAddOperationComponent"
-                >
-                  <v-icon>
-                    mdi-plus
-                  </v-icon>
-                </v-btn>
-
-                <add-data-operation
-                  v-if="show_operation_component"
-                  @close="closeAddOperationComponent"
-                />
-              </v-col>
-            </v-row>
-          </v-card-title>
-          <v-card-text>
-            <v-chip
-              v-for="(data_operation, data_operation_index) in data_operations"
-              :key="data_operation_index"
-              class="ma-1"
-              color="vtb-color"
-              outlined
-              text-color="vtb-color"
-              :draggable="true"
-              @dragstart="onDragStartDataOperation(data_operation, data_operation_index)"
-              @dragend="onDragEndDataOperation()"
+                <v-icon>
+                  mdi-delete
+                </v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col>
+              <v-btn
+                color="vtb-color"
+                text
+                rounded
+                @click="addResultField"
+              >
+                Добавить поле
+              </v-btn>
+            </v-col>
+          </v-row>
+        </template>
+        <template v-else>
+          <v-row
+            align="center"
+            class="fill-height"
+            justify="center"
+          >
+            <v-col
+              class="text-center"
+              cols="auto"
             >
-              {{ data_operation.name }} ({{ data_operation.formula }})
-            </v-chip>
-          </v-card-text>
-        </v-card>
+              <div
+                class="user-select-none grey--text text--lighten-1 text-h4"
+                @click="addResultField"
+              >
+                Нажмите чтобы добавить поле в результирующую выборку
+              </div>
+            </v-col>
+          </v-row>
+        </template>
       </v-col>
     </v-row>
 
@@ -407,8 +444,6 @@
        */
       openDatasets(datasets) {
         this.datasets.push(...datasets);
-
-        console.log(datasets);
       },
 
       addResultField() {
@@ -416,6 +451,10 @@
           name: '',
           formula: '',
         });
+      },
+
+      removeResultField(index) {
+        this.result_fields.splice(index, 1);
       },
 
       addCondition() {
@@ -468,10 +507,16 @@
       },
 
       onDropResultField(item) {
-        const ds_name = item.name = `${this.dragged_dataset.name}.${this.dragged_dataset.name}`;
+        let ds_name = '';
 
-        if (!item.name) {
-          item.name = `${this.dragged_dataset.name}.${this.dragged_dataset.name}`;
+        if (this.dragged_data_operation) {
+          ds_name = this.dragged_data_operation.formula;
+        } else {
+          ds_name = `${this.dragged_dataset.name}.${this.dragged_field.name}`;
+
+          if (!item.name) {
+            item.name = ds_name;
+          }
         }
 
         item.formula += ds_name;
@@ -510,8 +555,13 @@
         this.to_sort_fields.splice(index, 1);
       },
 
-      createTask() {
-
+      async createTask() {
+        await window.axios.post('/api/run_query', {
+          result_fields: this.result_fields,
+          select: this.to_selected_fields,
+          where: this.operations_to_fields,
+          sort: this.to_sort_fields,
+        });
       },
     },
   };
