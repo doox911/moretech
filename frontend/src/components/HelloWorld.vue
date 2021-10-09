@@ -39,8 +39,16 @@
        * @return {Array<DataSet>}
        */
       custom_datasets: [],
+
+      toasts: [],
     }),
     async mounted() {
+
+      // toasts.push(app.$toast.open('You did it!');
+      //
+      // instance.dismiss();
+      // app.$toast.clear();
+
     },
     methods: {
 

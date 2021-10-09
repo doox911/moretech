@@ -20,7 +20,7 @@
           :disabled="!selected_default_datasets || selected_default_datasets.length === 0"
           @click="openDataset"
         >
-          открыть датасет
+          открыть датасеты
         </v-btn>
       </v-col>
     </v-row>
@@ -52,6 +52,7 @@
       selected_default_datasets: [],
 
       loading: false,
+      loading_toast: null,
     }),
     computed: {
 
@@ -68,8 +69,29 @@
     },
     methods: {
 
+      showLoadingMessage() {
+        this.loading_toast = this.$toast.open({
+          message: 'Загрузка списка датасетов',
+          type: 'success',
+          duration: 6000000,
+        });
+      },
+
       openDataset() {
         this.$emit('openDatasets', this.selected_default_datasets.map(ds => ds.getCopy()));
+
+        datasets.map(dataset => {
+          const toast = this.$toast.open({
+            message: 'Датасет ' + dataset.name + ' готов к использованию',
+            type: 'success',
+            duration: 6000,
+            // all of other options may go here
+          });
+
+          this.toasts.push(toast);
+        });
+
+        this.selected_default_datasets = [];
       },
 
       async loadDefaultDatasets() {
