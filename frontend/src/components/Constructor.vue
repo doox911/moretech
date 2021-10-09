@@ -103,7 +103,7 @@
     <v-row justify="space-around">
       <!-- Selected -->
       <v-col
-        class="pa-3 rounded-lg fields-container"
+        class="pa-3 my-2 rounded-lg fields-container"
         md="3"
         sm="12"
         draggable="false"
@@ -145,7 +145,7 @@
 
       <!-- Sort -->
       <v-col
-        class="pa-3 rounded-lg fields-container"
+        class="pa-3 my-2 rounded-lg fields-container"
         md="3"
         sm="12"
         draggable="false"
@@ -187,6 +187,7 @@
 
       <!-- Where -->
       <v-col
+        class="my-2"
         md="5"
         sm="12"
       >
