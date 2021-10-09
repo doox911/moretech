@@ -188,97 +188,95 @@
         <template
           v-for="(item, index) in operations_to_fields"
         >
-
-        <v-row
-          :key="index"
-          align="center"
-        >
-
-          <v-col
-            sm="12"
+          <v-row
+            :key="index"
+            align="center"
           >
-            <v-row>
-              <v-col
-                class="ma-2 pa-3 rounded-lg fields-container"
-              >
-                <div
-                  @dragenter.prevent
-                  @dragover.prevent
-                  @dragleave.prevent
-                  @drop.prevent="onDropOperationField(index)"
-                  @dblclick="removeFieldFromOperationField(index)"
-                >
-                  <template v-if="item.field">
-                    <v-chip
-                      class="ma-2"
-                      color="vtb-color"
-                      outlined
-                      text-color="vtb-color"
-                    >
-                      {{ item.field.name }}
-                    </v-chip>
-                  </template>
-                  <template v-else>
-                    <v-row justify="center">
-                      <v-col cols="auto">
-                        <span class="user-select-none grey--text text--lighten-1 text-h4">
-                          Поле
-                        </span>
-                      </v-col>
-                    </v-row>
-                  </template>
-                </div>
-              </v-col>
-
-            </v-row>
-          </v-col>
-
-          <v-col cols="12">
-            <v-row align="center"
-              class="d-flex flex-nowrap"
+            <v-col
+              sm="12"
             >
-              <v-col
-                cols="3"
-              >
-                <v-select
-                  v-model="item.condition"
-                  class="width-select background-vtb-l-blue border-radius"
-                  outlined
-                  :items="operations"
-                  hide-details
-                />
-              </v-col>
-
-              <v-col cols="auto">
-                <v-text-field
-                  label="Значение для операции"
-                  class="border-radius"
-                  color="primary"
-                  v-model="item.value"
-                  hide-details
-                  outlined
-                />
-              </v-col>
-
-              <v-spacer></v-spacer>
-
-              <v-col cols="1">
-                <v-btn
-                  icon
-                  color="red"
-                  @click="removeOperation(index)"
+              <v-row>
+                <v-col
+                  class="ma-2 pa-3 rounded-lg fields-container"
                 >
-                  <v-icon>mdi-close</v-icon>
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-col>
+                  <div
+                    @dragenter.prevent
+                    @dragover.prevent
+                    @dragleave.prevent
+                    @drop.prevent="onDropOperationField(index)"
+                    @dblclick="removeFieldFromOperationField(index)"
+                  >
+                    <template v-if="item.field">
+                      <v-chip
+                        class="ma-2"
+                        color="vtb-color"
+                        outlined
+                        text-color="vtb-color"
+                      >
+                        {{ item.field.name }}
+                      </v-chip>
+                    </template>
+                    <template v-else>
+                      <v-row justify="center">
+                        <v-col cols="auto">
+                          <span class="user-select-none grey--text text--lighten-1 text-h4">
+                            Поле
+                          </span>
+                        </v-col>
+                      </v-row>
+                    </template>
+                  </div>
+                </v-col>
+              </v-row>
+            </v-col>
 
-        </v-row>
+            <v-col cols="12">
+              <v-row
+                align="center"
+                class="d-flex flex-nowrap"
+              >
+                <v-col
+                  cols="3"
+                >
+                  <v-select
+                    v-model="item.condition"
+                    class="width-select background-vtb-l-blue border-radius"
+                    outlined
+                    :items="operations"
+                    hide-details
+                  />
+                </v-col>
 
-        <div :key="`where-divider-${index}`"
-          class="divider vtb-color-border"
-        ></div>
+                <v-col cols="auto">
+                  <v-text-field
+                    v-model="item.value"
+                    label="Значение для операции"
+                    class="border-radius"
+                    color="primary"
+                    hide-details
+                    outlined
+                  />
+                </v-col>
+
+                <v-spacer />
+
+                <v-col cols="1">
+                  <v-btn
+                    icon
+                    color="red"
+                    @click="removeOperation(index)"
+                  >
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-col>
+          </v-row>
+
+          <div
+            :key="`where-divider-${index}`"
+            class="divider vtb-color-border"
+          />
         </template>
 
         <v-row>
@@ -446,10 +444,9 @@
       data_operations: [],
 
       operations: [
-        '+',
-        '-',
-        '/',
-        '*',
+        '>',
+        '<',
+        '<>',
         '=',
       ],
 
@@ -600,7 +597,7 @@
        * @param {number} index
        */
       onDropOperationField(index) {
-        this.operations_to_fields[index].field = { ...this.dragged_field };
+        this.operations_to_fields[index].field = { ...this.dragged_field, ...this.dragged_dataset };
 
         this.to_sort_fields = [...this.to_sort_fields];
       },
