@@ -3,8 +3,8 @@
     <v-row>
       <v-col cols="2">
         <v-autocomplete
-          v-model="selected_default_datasets"
-          :items="default_datasets"
+          v-model="selected_data_sources"
+          :items="data_sources"
           item-value="id"
           item-text="name"
           persistent-hint
@@ -12,18 +12,100 @@
           autocomplete="off"
           return-object
           :loading="loading"
+          label="Выбор датасетов"
         />
-
+      </v-col>
+      <v-col cols="1">
         <v-btn
-          text
-          color="teal accent-4"
-          :disabled="!selected_default_datasets || selected_default_datasets.length === 0"
+          color="success"
+          fab
+          icon
+          outlined
+          :loading="selected_data_sources.some(ds => ds.loading)"
+          :disabled="is_enable_button_open_datasets"
+          title="открыть датасеты"
           @click="openDataset"
         >
-          открыть датасеты
+          <v-icon>
+            mdi-play
+          </v-icon>
+        </v-btn>
+      </v-col>
+      <v-col cols="1">
+        <v-btn
+          color="success"
+          fab
+          icon
+          outlined
+          title="добавить новый источник"
+          @click="openAddDataSourceDialog"
+        >
+          <v-icon>
+            mdi-plus
+          </v-icon>
         </v-btn>
       </v-col>
     </v-row>
+
+    <v-dialog
+      v-model="data_source_dialog"
+      max-width="700px"
+      :transition="false"
+      persistent
+    >
+      <v-card>
+        <v-card-title style="padding-bottom: 0;">
+          <span class="text-h5">
+            Добавить источник датасета
+          </span>
+        </v-card-title>
+
+        <v-card-text class="pt-0">
+          <v-row>
+            <v-col
+              class="pl-2 pr-2"
+              cols="5"
+            >
+              <v-text-field
+                v-model="new_data_source.name"
+                label="Название датасета"
+                hide-details
+              />
+            </v-col>
+            <v-col
+              class="pl-2 pr-2"
+              cols="7"
+            >
+              <v-text-field
+                v-model="new_data_source.url"
+                label="URL"
+                hide-details
+              />
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="success"
+            text
+            :disabled="create_loading"
+            :loading="create_loading"
+            @click="addDataSource"
+          >
+            Применить
+          </v-btn>
+          <v-btn
+            color="primary"
+            text
+            :disabled="create_loading"
+            @click="data_source_dialog = null"
+          >
+            Отмена
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -32,11 +114,19 @@
   /**
    * Classes
    */
-  import DataSet from 'Classes/DataSet';
+  import DataSource from 'Classes/DataSource';
 
   export default {
     name: 'SelectDatasets',
     data: () => ({
+
+      /**
+       * Источники датасетов
+       *
+       * @return {Array<DataSource>}
+       */
+      data_sources: [],
+
       /**
        * Датасеты из интернета
        *
@@ -45,61 +135,119 @@
       default_datasets: [],
 
       /**
-       * Выбранные датасеты
+       * Выбранные источники данных
        *
-       * @return {Array<DataSet>}
+       * @return {Array<DataSource>}
        */
-      selected_default_datasets: [],
+      selected_data_sources: [],
 
       loading: false,
       loading_toast: null,
       toasts: [],
+
+      data_source_dialog: false,
+      new_data_source: new DataSource({}),
+
+      create_loading: false,
     }),
     computed: {
 
-      collections_dataset_from_internet() {
-        return [
-          'country-list',
-          'population',
-          'covid-19',
-        ];
+      is_enable_button_open_datasets() {
+        return !this.selected_data_sources ||
+          this.selected_data_sources.some(ds => !ds.loaded) ||
+          this.selected_data_sources.length === 0;
+      },
+    },
+    watch: {
+
+      selected_data_sources() {
+        this.selected_data_sources.map(data_source => {
+          data_source.loadDataSet();
+        });
       },
     },
     async mounted() {
+      this.new_data_source = new DataSource({});
+
       await this.loadDefaultDatasets();
     },
     methods: {
 
-      showLoadingMessage() {
-        this.loading_toast = this.$toast.open({
-          message: 'Загрузка списка датасетов',
-          type: 'success',
-          duration: 6000000,
-        });
-      },
+      /**
+       * Добавляет источник датасета
+       */
+      addDataSource() {
+        this.create_loading = true;
 
-      openDataset() {
-        this.$emit('openDatasets', this.selected_default_datasets.map(ds => ds.getCopy()));
+        window.axios.post('/api/datasource', {
+          name: this.new_data_source.name,
+          url: this.new_data_source.url,
+        }).then(response => {
+          this.loadDefaultDatasets();
 
-        this.selected_default_datasets.map(dataset => {
-          const toast = this.$toast.open({
-            message: 'Датасет ' + dataset.name + ' готов к использованию',
+          this.new_data_source = new DataSource({});
+
+          this.$toast.open({
+            message: 'Источник датасета ' + response.data.content.new_data_source.name + ' добавлен',
             type: 'success',
-            duration: 6000,
-            // all of other options may go here
+            duration: 3000,
           });
 
-          this.toasts.push(toast);
+          this.closeAddDataSourceDialog();
+        }).catch(errors => {
+          this.$toast.open({
+            message: 'Ошибка: ' + errors.response.data.message,
+            type: 'error',
+            duration: 30000,
+          });
+        }).finally(() => {
+          this.create_loading = false;
         });
-
-        this.selected_default_datasets = [];
       },
 
-      async loadDefaultDatasets() {
-        this.collections_dataset_from_internet.map(async dataset_name => {
-          const url = `https://datahub.io/core/${dataset_name}/datapackage.json`;
+      /**
+       * Открывает диалоговое окно добавления источника датасета
+       */
+      openAddDataSourceDialog() {
+        this.data_source_dialog = true;
+      },
 
-          this.default_datasets.push(await DataSet.fromUrl(url));
+      /**
+       * Закрывает диалоговое окно добавления источника датасета
+       */
+      closeAddDataSourceDialog() {
+        this.data_source_dialog = false;
+      },
+
+      /**
+       * Формирует событие о готовности к использованию выбранных датасетов
+       */
+      openDataset() {
+        this.$emit('openDatasets', this.selected_data_sources.map(data_source => data_source.dataset.getCopy()));
+
+        this.selected_data_sources.map(data_source => {
+          this.$toast.open({
+            message: 'Датасет ' + data_source.dataset.name + ' готов к использованию',
+            type: 'success',
+            duration: 6000,
+          });
+        });
+
+        this.selected_data_sources = [];
+      },
+
+      /**
+       * Загружает сохранённые датасеты
+       */
+      async loadDefaultDatasets() {
+        window.axios.get('/api/datasource').then(response => {
+          this.data_sources = response.data.content.data_sources.map(data => {
+            return new DataSource(data);
+          });
+        }).catch(errors => {
+          console.error(errors.response.data.messages);
+        }).finally(() => {
+          this.loading = false;
         });
 
         this.loading = false;

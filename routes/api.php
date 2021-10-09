@@ -14,5 +14,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::prefix('/datasource')->group(static function () {
+  Route::get('', [MetaDataController::class, 'getDataSources']);
+  Route::post('', [MetaDataController::class, 'storeDataSource']);
+
+  // Route::prefix('{erp_process}')->group(function () {
+  //   Route::put('', [ErpProcessController::class, 'update']);
+  //   Route::patch('set_parent', [ErpProcessController::class, 'setParent']);
+  //   Route::delete('', [ErpProcessController::class, 'destroy']);
+  // });
+});
+
+
 Route::get('catalogs', [MetaDataController::class, 'getCatalogs']);
+Route::get('datasets', [MetaDataController::class, 'getDatasets']);
 Route::post('run_query', [MetaDataController::class, 'runQuery']);
