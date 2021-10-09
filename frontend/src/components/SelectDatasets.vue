@@ -12,6 +12,7 @@
           autocomplete="off"
           return-object
           :loading="loading"
+          label="Выбор датасетов"
         />
       </v-col>
       <v-col cols="1">
@@ -20,6 +21,7 @@
           fab
           icon
           outlined
+          :loading="selected_data_sources.some(ds => ds.loading)"
           :disabled="is_enable_button_open_datasets"
           title="открыть датасеты"
           @click="openDataset"
@@ -171,6 +173,9 @@
     },
     methods: {
 
+      /**
+       * Добавляет источник датасета
+       */
       addDataSource() {
         this.create_loading = true;
 
@@ -190,44 +195,50 @@
 
           this.closeAddDataSourceDialog();
         }).catch(errors => {
-          console.error(errors.response.data.messages);
+          this.$toast.open({
+            message: 'Ошибка: ' + errors.response.data.message,
+            type: 'error',
+            duration: 30000,
+          });
         }).finally(() => {
           this.create_loading = false;
         });
       },
 
+      /**
+       * Открывает диалоговое окно добавления источника датасета
+       */
       openAddDataSourceDialog() {
         this.data_source_dialog = true;
       },
 
+      /**
+       * Закрывает диалоговое окно добавления источника датасета
+       */
       closeAddDataSourceDialog() {
         this.data_source_dialog = false;
       },
 
-      showLoadingMessage() {
-        this.loading_toast = this.$toast.open({
-          message: 'Загрузка списка датасетов',
-          type: 'success',
-          duration: 6000000,
-        });
-      },
-
+      /**
+       * Формирует событие о готовности к использованию выбранных датасетов
+       */
       openDataset() {
         this.$emit('openDatasets', this.selected_data_sources.map(data_source => data_source.dataset.getCopy()));
 
         this.selected_data_sources.map(data_source => {
-          const toast = this.$toast.open({
+          this.$toast.open({
             message: 'Датасет ' + data_source.dataset.name + ' готов к использованию',
             type: 'success',
             duration: 6000,
           });
-
-          this.toasts.push(toast);
         });
 
         this.selected_data_sources = [];
       },
 
+      /**
+       * Загружает сохранённые датасеты
+       */
       async loadDefaultDatasets() {
         window.axios.get('/api/datasource').then(response => {
           this.data_sources = response.data.content.data_sources.map(data => {

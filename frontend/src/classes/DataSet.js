@@ -19,13 +19,12 @@ class DataSet {
   }
 
   /**
-   * Создание объекта из ссылки на данные
+   * Создание объекта датасета из ссылки на данные
    *
    * @param {string} url
    */
   static async fromUrl(url) {
-    // eslint-disable-next-line no-undef
-    const promise = axios.get(url);
+    const promise = window.axios.get(url);
     const data = (await promise).data;
 
     const schema = data.resources.find(resource => resource.format === 'json' && Boolean(resource.mediatype)).schema;
@@ -38,6 +37,11 @@ class DataSet {
     });
   }
 
+  /**
+   * Возвращает копию текущего объекта, с другим ID
+   *
+   * @return {DataSet}
+   */
   getCopy() {
     return new DataSet(this);
   }
