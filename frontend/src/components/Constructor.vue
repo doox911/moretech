@@ -160,21 +160,53 @@
             </div>
           </v-col>
           <v-col
-            cols="auto"
+            cols="12"
           >
-            <v-select
-              v-model="item.condition"
+            <v-row>
+              <v-col cols="10">
+                <v-select
+                  v-model="item.condition"
+                  rounded
+                  class="width-select background-vtb-l-blue border-vtb-blue"
+                  :items="data_operations"
+                  item-value="id"
+                  item-text="name"
+                  title="выбрать операцию"
+                  label="выбрать операцию"
+                  :loading="loading_data_operations"
+                  :disabled="loading_data_operations"
+                />
+              </v-col>
+              <v-col cols="2">
+                <v-btn
+                  color="success"
+                  fab
+                  icon
+                  outlined
+                  title="добавить новую операцию"
+                  @click="openAddOperationComponent"
+                >
+                  <v-icon>
+                    mdi-plus
+                  </v-icon>
+                </v-btn>
 
-              rounded
-              class="width-select background-vtb-l-blue border-vtb-blue"
-              :items="operations"
-            />
-          </v-col>
-          <v-col>
-            <v-text-field
-              v-model="item.value"
-              hide-details
-            />
+                <add-data-operation
+                  v-if="show_operation_component"
+                  @close="closeAddOperationComponent"
+                />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col>
+                <v-text-field
+                  v-model="item.value"
+                  hide-details
+                  label="условие поля"
+                />
+              </v-col>
+            </v-row>
           </v-col>
         </v-row>
         <v-row>
@@ -234,6 +266,36 @@
         </v-row>
       </v-col>
     </v-row>
+
+    <v-row>
+      <v-col
+        cols="12"
+        sm="6"
+        md="4"
+      >
+        <v-card>
+          <v-card-title class="mb-3 vtb-color white--text">
+            Операции
+          </v-card-title>
+          <v-card-text>
+            <v-chip
+              v-for="(data_operation, data_operation_index) in data_operations"
+              :key="data_operation_index"
+              class="ma-1"
+              color="vtb-color"
+              outlined
+              text-color="vtb-color"
+              :draggable="true"
+              @dragstart="onDragStartDataOperation(data_operation, data_operation_index)"
+              @dragend="onDragEndDataOperation()"
+            >
+              {{ data_operation.name }} ({{ data_operation.formula }})
+            </v-chip>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+
     <v-row
       align="center"
       justify="center"
@@ -254,54 +316,81 @@
 
 <script>
 
+  /**
+   * Functions
+   */
   import { isEqual, uniqWith } from 'lodash';
-  import SelectDatasets from './SelectDatasets';
+
+  /**
+   * Components
+   */
+  import SelectDatasets from 'Components/SelectDatasets';
+  import AddDataOperation from 'Components/AddDataOperation';
+  import DataOperation from 'Classes/DataOperation';
 
   export default {
     name: 'Constructor',
-
     components: {
       SelectDatasets,
+      AddDataOperation,
     },
-
     data: () => ({
       datasets: [],
       dragged_dataset: [],
       dragged_field: null,
       dragged_field_index: null,
 
+      /**
+       * Поля для перестаскивания операций
+       */
+      dragged_data_operation: null,
+      dragged_data_operation_index: null,
+
       to_selected_fields: [],
       to_sort_fields: [],
       operations_to_fields: [],
       result_fields: [],
 
-      operations: [
-        '>',
-        '<',
-        '=',
-      ],
+      show_operation_component: false,
+
+      loading_data_operations: false,
+      data_operations: [],
     }),
-
     computed: {},
-
     async mounted() {
-      // const path = 'https://datahub.io/core/population/datapackage.json';
-      //
-      // const response = await fetch(path);
-      //
-      // const data = await response.json();
-      //
-      // const schemas = data.resources.map(r => r.schema).filter(e => !!e);
-      //
-      // this.datasets.push({
-      //   name: data.name,
-      //   schemas,
-      // });
-      //
-      // console.log(this.datasets);
+      await this.loadDataOperations();
     },
 
     methods: {
+
+      /**
+       * Загружает сохранённые операции над полями датасетов
+       */
+      async loadDataOperations() {
+        this.loading_data_operations = true;
+
+        window.axios.get('/api/data_operation').then(response => {
+          this.data_operations = response.data.content.data_operations.map(data => {
+            return new DataOperation(data);
+          });
+        }).catch(errors => {
+          console.error(errors.response.data.messages);
+        }).finally(() => {
+          this.loading_data_operations = false;
+        });
+      },
+
+      openAddOperationComponent() {
+        this.show_operation_component = true;
+      },
+
+      closeAddOperationComponent() {
+        this.show_operation_component = false;
+      },
+
+      /**
+       * @param {Array<DataSet>} datasets
+       */
       openDatasets(datasets) {
         this.datasets.push(...datasets);
 
@@ -333,6 +422,25 @@
         this.dragged_dataset = null;
         this.dragged_field = null;
         this.dragged_field_index = null;
+      },
+
+      /**
+       * Срабатывает при перетаскивании мышки с чипсом операцией
+       *
+       * @param {DataOperation} data_operation
+       * @param {number} data_operation_index
+       */
+      onDragStartDataOperation(data_operation, data_operation_index) {
+        this.dragged_data_operation = data_operation;
+        this.dragged_data_operation_index = data_operation_index;
+      },
+
+      /**
+       * Срабатывает при отпускании мышки с чипсом операцией
+       */
+      onDragEndDataOperation() {
+        this.dragged_data_operation = null;
+        this.dragged_data_operation_index = null;
       },
 
       onDropSelectedFields() {
@@ -387,7 +495,6 @@
 </script>
 
 <style scoped>
-
   .fields-container {
     min-height: 3.2em;
     border: 2px dashed #46abf8;
@@ -398,6 +505,6 @@
   }
 
   .width-select {
-    max-width: 100px;
+
   }
 </style>

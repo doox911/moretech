@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\DataOperation;
 use App\Models\DataSource;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Class MetaDataService
@@ -28,7 +29,11 @@ class MetaDataService {
    * @return Collection
    */
   public static function getDataOperations(): Collection {
-    return DataOperation::all();
+    $user = Auth::user();
+
+    return DataOperation::whereNull('user_id')
+      ->orWhere('user_id', $user->id ?? null)
+      ->get();
   }
 
 }
