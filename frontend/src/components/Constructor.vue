@@ -19,7 +19,7 @@
         md="4"
       >
         <v-card>
-          <v-card-title class="light-blue lighten-1">
+          <v-card-title class="mb-3 blue lighten-1 white--text">
             {{ dataset.name }}
           </v-card-title>
           <v-card-text>
@@ -27,8 +27,9 @@
               v-for="(field, field_index) in dataset.schema.fields"
               :key="field_index"
               class="ma-1"
-              color="light-blue"
-              text-color="white"
+              color="blue lighten-1"
+              outlined
+              text-color="blue lighten-1"
               :draggable="true"
               @dragstart="onDragStart(field, field_index, dataset)"
               @dragend="onDragEnd()"
@@ -55,8 +56,9 @@
             v-for="(field, index) in to_selected_fields"
             :key="index"
             class="ma-2"
-            color="light-blue"
-            text-color="white"
+            color="blue lighten-1"
+            outlined
+            text-color="blue lighten-1"
             @dblclick="removeFieldFromSelect(index)"
           >
             {{ field.name }}
@@ -90,8 +92,9 @@
             v-for="(field, index) in to_sort_fields"
             :key="index"
             class="ma-2"
-            color="light-blue"
-            text-color="white"
+            color="blue lighten-1"
+            outlined
+            text-color="blue lighten-1"
             @dblclick="removeFieldFromSort(index)"
           >
             {{ field.name }}
@@ -130,9 +133,10 @@
             >
               <template v-if="item.field">
                 <v-chip
-                  color="light-blue"
                   class="ma-2"
-                  text-color="white"
+                  color="blue lighten-1"
+                  outlined
+                  text-color="blue lighten-1"
                 >
                   {{ item.field.name }}
                 </v-chip>
@@ -169,7 +173,7 @@
         <v-row>
           <v-col>
             <v-btn
-              color="light-blue"
+              color="blue lighten-1"
               text
               rounded
               @click="addCondition"
@@ -299,15 +303,11 @@
 
   .fields-container {
     min-height: 3.2em;
-    border: 2px dashed #03A9F4;
-  }
-
-  .background-vtb-l-blue {
-    background-color: #B3E5FC !important;
+    border: 2px dashed #42A5F5;
   }
 
   .border-vtb-blue {
-    border: 2px solid #03A9F4 !important;
+    border: 2px solid #42A5F5 !important;
   }
 
   .width-select {
