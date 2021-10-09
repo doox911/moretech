@@ -17,7 +17,7 @@ class DataSourceRequest extends FormRequest {
   public function rules(): array {
     return [
       'name' => 'required|max:191',
-      'url' => 'required|max:591',
+      'url' => 'required|url',
     ];
   }
 }
