@@ -566,13 +566,15 @@
       },
 
       onDropSelectedFields() {
-        this.to_selected_fields.push({
-          ...this.dragged_field,
-          dataset_id: this.dragged_dataset.id,
-          dataset_name: this.dragged_dataset.name,
-        });
+        if (this.dragged_dataset.id) {
+          this.to_selected_fields.push({
+            ...this.dragged_field,
+            dataset_id: this.dragged_dataset.id,
+            dataset_name: this.dragged_dataset.name,
+          });
 
-        this.to_selected_fields = [...uniqWith(this.to_selected_fields, isEqual)];
+          this.to_selected_fields = [...uniqWith(this.to_selected_fields, isEqual)];
+        }
       },
 
       onDropResultField(item) {
@@ -596,13 +598,15 @@
       },
 
       onDropSortFields() {
-        this.to_sort_fields.push({
-          ...this.dragged_field,
-          dataset_id: this.dragged_dataset.id,
-          dataset_name: this.dragged_dataset.name,
-        });
+        if (this.dragged_dataset.id) {
+          this.to_sort_fields.push({
+            ...this.dragged_field,
+            dataset_id: this.dragged_dataset.id,
+            dataset_name: this.dragged_dataset.name,
+          });
 
-        this.to_sort_fields = [...uniqWith(this.to_sort_fields, isEqual)];
+          this.to_sort_fields = [...uniqWith(this.to_sort_fields, isEqual)];
+        }
       },
 
       /**
