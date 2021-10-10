@@ -501,8 +501,9 @@
       /**
        * Закрывает окно компонента добавления операции для применения к данным датасетов
        */
-      closeAddOperationComponent() {
+      async closeAddOperationComponent() {
         this.show_operation_component = false;
+        await this.loadDataOperations();
       },
 
       /**
