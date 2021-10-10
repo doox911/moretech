@@ -42,14 +42,14 @@ Route::prefix('v1')
 Route::prefix('/datasource')->group(static function () {
   Route::get('', [MetaDataController::class, 'getDataSources']);
   Route::post('', [MetaDataController::class, 'storeDataSource']);
-
-  // Route::prefix('{erp_process}')->group(function () {
-  //   Route::put('', [ErpProcessController::class, 'update']);
-  //   Route::patch('set_parent', [ErpProcessController::class, 'setParent']);
-  //   Route::delete('', [ErpProcessController::class, 'destroy']);
-  // });
 });
 
+Route::prefix('/data_operation')->group(static function () {
+  Route::get('', [MetaDataController::class, 'getDataOperations']);
+  Route::post('', [MetaDataController::class, 'storeDataOperation']);
+});
+
+Route::post('/download_task_file', [MetaDataController::class, 'downloadTaskFile']);
 
 Route::get('catalogs', [MetaDataController::class, 'getCatalogs']);
 Route::get('datasets', [MetaDataController::class, 'getDatasets']);

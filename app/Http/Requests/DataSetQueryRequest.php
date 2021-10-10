@@ -13,21 +13,21 @@ class DataSetQueryRequest extends FormRequest {
   public function rules(): array {
     return [
       'select' => 'required|array',
-      'select.*.field_name' => 'required|string',
-      'select.*.field_type' => 'required|string',
+      'select.*.name' => 'required|string',
+      'select.*.type' => 'required|string',
       'select.*.dataset_name' => 'required|string',
 
-      'where' => 'required|array',
+      'where' => 'present|array',
       'where.*.field' => 'required|array',
-      'where.*.field.*.field_name' => 'required|string',
-      'where.*.field.*.field_type' => 'required|string',
-      'where.*.field.*.dataset_name' => 'required|string',
+      'where.*.field.name' => 'required|string',
+      'where.*.field.type' => 'required|string',
+      'where.*.field.dataset_name' => 'required|string',
       'where.*.condition' => 'required|string',
       'where.*.value' => 'required|string',
 
-      'sort' => 'required|array',
-      'sort.*.field_name' => 'required|string',
-      'sort.*.field_type' => 'required|string',
+      'sort' => 'array|present',
+      'sort.*.name' => 'required|string',
+      'sort.*.type' => 'required|string',
       'sort.*.dataset_name' => 'required|string',
     ];
   }

@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 /**
  * @package
  */
-class DataSourceRequest extends FormRequest {
+class DataOperationRequest extends FormRequest {
 
   /**
    * Get the validation rules that apply to the request.
@@ -17,7 +17,8 @@ class DataSourceRequest extends FormRequest {
   public function rules(): array {
     return [
       'name' => 'required|max:191',
-      'url' => 'required|url',
+      //'canonical_name' => 'required|max:191',
+      'formula' => 'required|max:500',
     ];
   }
 }

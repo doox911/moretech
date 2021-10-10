@@ -1,7 +1,11 @@
 <template>
   <v-container>
-    <v-row>
-      <v-col cols="2">
+    <v-row justify="space-between">
+      <v-col
+        cols="12"
+        md="8"
+        sm="12"
+      >
         <v-autocomplete
           v-model="selected_data_sources"
           :items="data_sources"
@@ -12,14 +16,20 @@
           autocomplete="off"
           return-object
           :loading="loading"
+          :disabled="loading"
+          label="Выбор датасетов"
         />
       </v-col>
-      <v-col cols="1">
+      <v-col
+        cols="3"
+        sm="1"
+      >
         <v-btn
           color="success"
           fab
           icon
           outlined
+          :loading="selected_data_sources.some(ds => ds.loading)"
           :disabled="is_enable_button_open_datasets"
           title="открыть датасеты"
           @click="openDataset"
@@ -29,7 +39,10 @@
           </v-icon>
         </v-btn>
       </v-col>
-      <v-col cols="1">
+      <v-col
+        cols="3"
+        sm="1"
+      >
         <v-btn
           color="success"
           fab
@@ -140,8 +153,6 @@
       selected_data_sources: [],
 
       loading: false,
-      loading_toast: null,
-      toasts: [],
 
       data_source_dialog: false,
       new_data_source: new DataSource({}),
@@ -171,6 +182,9 @@
     },
     methods: {
 
+      /**
+       * Добавляет источник датасета
+       */
       addDataSource() {
         this.create_loading = true;
 
@@ -190,45 +204,53 @@
 
           this.closeAddDataSourceDialog();
         }).catch(errors => {
-          console.error(errors.response.data.messages);
+          this.$toast.open({
+            message: 'Ошибка: ' + errors.response.data.message,
+            type: 'error',
+            duration: 30000,
+          });
         }).finally(() => {
           this.create_loading = false;
         });
       },
 
+      /**
+       * Открывает диалоговое окно добавления источника датасета
+       */
       openAddDataSourceDialog() {
         this.data_source_dialog = true;
       },
 
+      /**
+       * Закрывает диалоговое окно добавления источника датасета
+       */
       closeAddDataSourceDialog() {
         this.data_source_dialog = false;
       },
 
-      showLoadingMessage() {
-        this.loading_toast = this.$toast.open({
-          message: 'Загрузка списка датасетов',
-          type: 'success',
-          duration: 6000000,
-        });
-      },
-
+      /**
+       * Формирует событие о готовности к использованию выбранных датасетов
+       */
       openDataset() {
         this.$emit('openDatasets', this.selected_data_sources.map(data_source => data_source.dataset.getCopy()));
 
         this.selected_data_sources.map(data_source => {
-          const toast = this.$toast.open({
+          this.$toast.open({
             message: 'Датасет ' + data_source.dataset.name + ' готов к использованию',
             type: 'success',
             duration: 6000,
           });
-
-          this.toasts.push(toast);
         });
 
         this.selected_data_sources = [];
       },
 
+      /**
+       * Загружает сохранённые датасеты
+       */
       async loadDefaultDatasets() {
+        this.loading = true;
+
         window.axios.get('/api/datasource').then(response => {
           this.data_sources = response.data.content.data_sources.map(data => {
             return new DataSource(data);
@@ -238,8 +260,6 @@
         }).finally(() => {
           this.loading = false;
         });
-
-        this.loading = false;
       },
 
     },

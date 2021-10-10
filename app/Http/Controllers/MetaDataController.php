@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DataOperationRequest;
 use App\Http\Requests\DataSourceRequest;
+use App\Http\Resources\DataOperationResource;
+use App\Models\DataOperation;
+use App\Services\CommandService;
 use App\Services\MetaDataService;
 use App\Classes\DataSetsGetter;
 use App\Classes\MetaDataGetter;
@@ -12,11 +16,41 @@ use App\Models\DataSource;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use JsonException;
 use Throwable;
 
 class MetaDataController {
 
+  private $user = null;
+
+
+  public function __construct() {
+    $this->user = Auth::user();
+  }
+
   /**
+   * Отдаёт в браузер JSON-файл с заданием
+   *
+   * @param Request $request
+   * @return Response
+   * @throws JsonException
+   */
+  public function downloadTaskFile(Request $request): Response {
+    $task = json_encode($request->input('task'), JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);
+
+    $filename = 'datahub_task';
+
+    return response($task)
+      ->header('filename', $filename . '.json')
+      ->header('Content-Type', 'application/json');
+  }
+
+
+  /**
+   * Создаёт источник датасета
    *
    * @param DataSourceRequest $request
    * @return JsonResponse
@@ -34,9 +68,9 @@ class MetaDataController {
   }
 
   /**
+   * Возвращает список источников датасетов
    *
    * @return JsonResponse
-   * @description Возврващает список датасетов
    */
   public function getDataSources(): JsonResponse {
     return response()->json([
@@ -47,11 +81,11 @@ class MetaDataController {
   }
 
   /**
+   * Добавляет источник датасета
    *
    * @param string $name
    * @param string $url
    * @return JsonResponse
-   * @description Возвращает список датасетов
    */
   public function addDataSource(string $name, string $url): JsonResponse {
     $data_source = DataSource::create([
@@ -67,9 +101,62 @@ class MetaDataController {
   }
 
   /**
+   * Сохраняет операцию на данными
+   *
+   * @param DataOperationRequest $request
+   * @return JsonResponse
+   * @throws Throwable
+   */
+  public function storeDataOperation(DataOperationRequest $request): JsonResponse {
+    $data = $request->validated();
+    $data['user_id'] = $this->user->id ?? null;
+
+    return response()->json([
+      'messages' => ['Операция успешно сохранена'],
+      'content' => [
+        'new_data_operation' => DataOperation::create($data),
+      ]
+    ]);
+  }
+
+  /**
+   * Возвращает список операций над данными датасетов
    *
    * @return JsonResponse
-   * @description Возврващает список датасетов
+   */
+  public function getDataOperations(): JsonResponse {
+    return response()->json([
+      'content' => [
+        'data_operations' => DataOperationResource::collection(MetaDataService::getDataOperations()),
+      ]
+    ]);
+  }
+
+  /**
+   * Добавляет операцию над данными датасетов
+   *
+   * @param string $name
+   * @param string $formula
+   * @return JsonResponse
+   */
+  public function addDataOperation(string $name, string $formula): JsonResponse {
+    $data_process = DataOperation::create([
+      'name' => $name,
+      'formula' => $formula,
+      'user_id' => $this->user->id ?? null,
+    ]);
+
+    return response()->json([
+      'content' => [
+        'data_process' => DataOperationResource::make($data_process),
+      ]
+    ]);
+  }
+
+  /**
+   * Возвращает список датасетов
+   *
+   * @return JsonResponse
    * @throws GuzzleException
    */
   public function getDatasets(): JsonResponse {
@@ -121,29 +208,78 @@ class MetaDataController {
     ]);
   }
 
-  public function runQuery(DataSetQueryRequest $request) {
+  /**
+   * @param DataSetQueryRequest $request
+   * @return JsonResponse
+   */
+  public function runQuery(DataSetQueryRequest $request): JsonResponse {
     $data = $request->validated();
+
 
     $select_fields = $data['select'];
 
     $queries = [];
     foreach ($select_fields as $select_field) {
+      $field = '\`' . $select_field['dataset_name'] . '\`.\`' . $select_field['name'] . '\`';
       if (!isset($queries[$select_field['dataset_name']])) {
-        $queries[$select_field['dataset_name']] = "select {$select_field['field_name']}";
+        $queries[$select_field['dataset_name']] = "select $field";
       } else {
-        $queries[$select_field['dataset_name']] .= ",{$select_field['field_name']}";
+        $queries[$select_field['dataset_name']] .= ",$field";
       }
     }
 
-    dd($queries);
 
-    // todo where
-    $where = $data['where'];
+    $where_fields = $data['where'];
+    foreach ($where_fields as $where_field) {
+      $query = &$queries[$where_field['field']['dataset_name']];
+      if (!isset($query) || ($query && !strstr($query, 'where'))) {
 
-    // todo sort
-    $sort = $data['sort'];
+        if (!strstr($query, 'select')) {
+          $query = "select *";
+        }
+
+        $query .= " from {$where_field['field']['dataset_name']} where ";
+      } else {
+        $query .= " and ";
+      }
+      $field = '\`' . $where_field['field']['dataset_name'] . '\`.\`' . $where_field['field']['name'] . '\`';
+
+      $query .= "$field {$where_field['condition']} {$where_field['value']}";
+    }
+
+    unset($query);
+
+    $sort_fields = $data['sort'];
+
+    foreach ($sort_fields as $sort_field) {
+      $query = &$queries[$sort_field['dataset_name']];
+
+      if (!$query || !strstr($query, 'select')) {
+        $query = "select *";
+      }
+
+      if (!strstr($query, 'from')) {
+        $query .= " from {$sort_field['dataset_name']}";
+      }
+
+      $field = '\`' . $sort_field['dataset_name'] . '\`.\`' . $sort_field['name'] . '\`';
+
+      if (!strstr($query, 'order by')) {
+        $query .= " ORDER BY \`$field\`";
+      } else {
+        $query .= ",  \`$field\`";
+      }
+    }
 
 
-    return $query;
+    $cs = (new CommandService($queries))->run();
+
+
+    return response()->json([
+      'message' => 'Все запросы успешно отправлены в очередь',
+      'content' => [
+        'queries' => $cs
+      ]
+    ]);
   }
 }
