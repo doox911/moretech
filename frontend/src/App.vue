@@ -41,5 +41,11 @@
     data: () => ({
     //
     }),
+
+    watch: {
+      isAuth() {
+        this.toggleVNavigationDrawer();
+      },
+    },
   };
 </script>

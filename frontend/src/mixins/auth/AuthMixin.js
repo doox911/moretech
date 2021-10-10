@@ -90,6 +90,7 @@ export default {
      */
     async login(email, password) {
       await this.query(async () => {
+        await window.axios.get('/sanctum/csrf-cookie');
         await this.$store.dispatch(ActionTypes.LOGIN, {
           email,
           password,

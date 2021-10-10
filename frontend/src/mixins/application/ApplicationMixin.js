@@ -10,12 +10,6 @@ import DefaultStoreException from '../../store/exceptions/DefaultStoreException'
 
 export default {
 
-  watch: {
-    system_snackbar(value) {
-      this.$store.commit(MutationTypes.TOGGLE_SYSTEM_SNACKBAR, value);
-    },
-  },
-
   computed: {
 
     /**
